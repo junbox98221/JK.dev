@@ -2,6 +2,7 @@
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import Background from '../components/Background.astro';
+import SEOComponent from '../components/SEOComponent.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
@@ -9,21 +10,40 @@ import '../styles/global.css';
 export interface Props {
   title: string;
   description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  tags?: string[];
+  author?: string;
 }
 
-const { title, description = 'JK.dev - 개발 블로그 & 기술 저널' } = Astro.props;
+const {
+  title,
+  description = 'JK.dev - 프론트엔드 개발과 성능 최적화에 관한 기술 블로그',
+  image,
+  type = 'website',
+  publishedTime,
+  tags,
+  author,
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
-    <title>{title}</title>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+    <SEOComponent
+      title={title}
+      description={description}
+      type={type}
+      image={image}
+      publishedTime={publishedTime}
+      tags={tags}
+      author={author}
+    />
+
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css"

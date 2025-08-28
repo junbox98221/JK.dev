@@ -66,7 +66,16 @@ if (heroImage) {
 }
 ---
 
-<Layout title={title} description={description}>
+<Layout 
+  title={title} 
+  description={description}
+  type="article"
+  image={heroImageUrl}
+  publishedTime={pubDate.toISOString()}
+  modifiedTime={updatedDate?.toISOString()}
+  tags={tags}
+  author="JK"
+>
   <article class="prose prose-zinc mx-auto max-w-4xl dark:prose-invert lg:prose-lg">
     <div class="mb-12">
       <h1

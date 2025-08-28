@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 import { loadEnv } from 'vite';
 const { SITE_ORIGIN, VERCEL_BRANCH_URL } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 // Determine site URL based on environment
@@ -21,5 +22,5 @@ const getSiteURL = () => {
 // https://astro.build/config
 export default defineConfig({
   site: getSiteURL(),
-  integrations: [tailwind(), react(), mdx()],
+  integrations: [tailwind(), react(), mdx(), sitemap()],
 });

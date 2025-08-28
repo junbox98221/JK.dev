@@ -1,0 +1,157 @@
+---
+import { SEO, Props as SeoType } from 'astro-seo';
+
+// Constants
+const SITE_NAME = 'JK.dev';
+const TWITTER_HANDLE = '@jk_dev';
+const DEFAULT_SECTION = 'Technology';
+
+export interface Props {
+  title: string;
+  description: string;
+  type?: 'website' | 'article';
+  image?: string;
+  publishedTime?: string;
+  tags?: string[];
+  author?: string;
+}
+
+const {
+  title,
+  description,
+  type = 'website',
+  image,
+  publishedTime,
+  tags = [],
+  author = 'JK',
+} = Astro.props;
+
+const siteUrl = Astro.site?.href;
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+let imageUrl: string;
+if (image) {
+  imageUrl = image.startsWith('http') ? image : new URL(image, siteUrl).href;
+} else {
+  imageUrl = new URL('/placeholder.jpg', siteUrl).href;
+}
+
+const blogPostingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description: description,
+  image: imageUrl,
+  author: {
+    '@type': 'Person',
+    name: author,
+    url: siteUrl,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE_NAME,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/favicon.svg', siteUrl).href,
+    },
+  },
+  datePublished: publishedTime,
+  dateModified: publishedTime,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonicalUrl,
+  },
+  keywords: tags.join(', '),
+  inLanguage: 'ko-KR',
+  url: canonicalUrl,
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  description: '프론트엔드 개발에 관한 기술 블로그',
+  url: siteUrl,
+  author: {
+    '@type': 'Person',
+    name: 'JK',
+  },
+  inLanguage: 'ko-KR',
+};
+
+const structuredData = type === 'article' ? blogPostingSchema : websiteSchema;
+
+const openGraphConfig: SeoType['openGraph'] = {
+  basic: {
+    title: title,
+    type: type,
+    image: imageUrl,
+    url: canonicalUrl,
+  },
+  optional: {
+    description: description,
+    siteName: SITE_NAME,
+    locale: 'ko_KR',
+  },
+  image: {
+    alt: title,
+    width: 1200,
+    height: 630,
+  },
+  article:
+    type === 'article' && publishedTime
+      ? {
+          publishedTime: publishedTime,
+          modifiedTime: publishedTime,
+          authors: [author],
+          section: DEFAULT_SECTION,
+          tags: tags,
+        }
+      : undefined,
+};
+
+const twitterConfig: SeoType['twitter'] = {
+  card: 'summary_large_image',
+  site: TWITTER_HANDLE,
+  creator: TWITTER_HANDLE,
+  title: title,
+  description: description,
+  image: imageUrl,
+  imageAlt: title,
+};
+
+const extendConfig: SeoType['extend'] = {
+  meta: [
+    { name: 'author', content: author },
+    { name: 'language', content: 'ko' },
+    { name: 'robots', content: 'index,follow' },
+    { name: 'theme-color', content: '#ffffff' },
+    { name: 'format-detection', content: 'telephone=no' },
+    ...(type === 'article' && tags.length > 0
+      ? [{ name: 'keywords', content: tags.join(', ') }]
+      : []),
+  ],
+  link: [
+    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+    { rel: 'sitemap', href: '/sitemap-index.xml' },
+    {
+      rel: 'alternate',
+      type: 'application/rss+xml',
+      title: `${SITE_NAME} RSS Feed`,
+      href: '/rss.xml',
+    },
+    { rel: 'preconnect', href: 'https://cdn.jsdelivr.net', crossorigin: '' },
+  ],
+};
+---
+
+<SEO
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  openGraph={openGraphConfig}
+  twitter={twitterConfig}
+  extend={extendConfig}
+/>
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json" set:html={JSON.stringify(structuredData, null, 2)} />
