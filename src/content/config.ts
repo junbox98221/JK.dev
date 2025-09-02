@@ -4,7 +4,6 @@ export const blogSchema = z.object({
   title: z.string(),
   description: z.string(),
   pubDate: z.date(),
-  updatedDate: z.date().optional(),
   heroImage: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });

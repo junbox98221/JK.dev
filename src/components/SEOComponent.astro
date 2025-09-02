@@ -21,7 +21,6 @@ const {
   type = 'website',
   heroImage = SITE_CONFIG.defaultImage,
   pubDate,
-  updatedDate,
   tags = [],
 } = Astro.props;
 
@@ -49,7 +48,7 @@ const blogPostSchema: WithContext<BlogPosting> = {
     },
   },
   datePublished: pubDate?.toISOString(),
-  dateModified: updatedDate?.toISOString() || pubDate?.toISOString(),
+  dateModified: pubDate?.toISOString(),
   mainEntityOfPage: {
     '@type': 'WebPage',
     '@id': canonicalUrl,
@@ -93,7 +92,7 @@ const openGraphConfig: SeoType['openGraph'] = {
     type === 'article' && pubDate
       ? {
           publishedTime: pubDate?.toISOString(),
-          modifiedTime: updatedDate?.toISOString() || pubDate?.toISOString(),
+          modifiedTime: pubDate?.toISOString(),
           authors: [author],
           section: SITE_CONFIG.defaultSection,
           tags,
