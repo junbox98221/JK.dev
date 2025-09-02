@@ -4,27 +4,11 @@ import FormattedDate from '../components/FormattedDate.astro';
 import ShareButtons from '../components/ShareButtons.astro';
 import TagList from '../components/TagList.astro';
 import './styles/markdown.css';
-export interface Props {
-  title: string;
-  description: string;
-  pubDate: Date;
-  updatedDate?: Date;
-  heroImage?: string;
-  readingTime?: string;
-  tags?: string[];
-}
+import type { BlogPost } from '../content/config';
 
-const {
-  title,
-  description,
-  pubDate,
-  updatedDate,
-  heroImage,
-  readingTime = '5 min read',
-  tags = [],
-} = Astro.props;
+export type Props = BlogPost;
+const { title, description, pubDate, heroImage, tags = [] } = Astro.props;
 
-// Fix for the canonicalURL creation
 let canonicalURL;
 try {
   canonicalURL = new URL(Astro.url.pathname, Astro.site?.origin || 'https://example.com');
@@ -33,48 +17,34 @@ try {
   canonicalURL = new URL('https://example.com');
 }
 
-const slug = Astro.url.pathname.split('/').filter(Boolean).pop() || ''; // Ensure slug is a string
-
-// Xử lý heroImage an toàn hơn - hỗ trợ cả URL tuyệt đối và đường dẫn tương đối
-let heroImageUrl = null;
+let heroImageUrl: string | undefined;
 if (heroImage) {
   try {
-    // Kiểm tra nếu là URL đầy đủ
     if (heroImage.startsWith('http')) {
       heroImageUrl = heroImage;
-    }
-    // Kiểm tra nếu là đường dẫn tương đối
-    else if (heroImage.startsWith('/')) {
-      // Nếu Astro.site tồn tại, sử dụng nó làm cơ sở
+    } else if (heroImage.startsWith('/')) {
       if (Astro.site) {
         heroImageUrl = new URL(heroImage, Astro.site).toString();
-      }
-      // Nếu không, sử dụng đường dẫn tương đối như đã cung cấp
-      else {
+      } else {
         heroImageUrl = heroImage;
       }
-    }
-    // Trường hợp khác
-    else {
+    } else {
       heroImageUrl = heroImage;
     }
   } catch (error) {
     console.error(`Error processing heroImage: ${heroImage}`, error);
-    // Sử dụng đường dẫn gốc nếu có lỗi
     heroImageUrl = heroImage;
   }
 }
 ---
 
-<Layout 
-  title={title} 
+<Layout
+  title={title}
   description={description}
   type="article"
-  image={heroImageUrl}
-  publishedTime={pubDate.toISOString()}
-  modifiedTime={updatedDate?.toISOString()}
+  heroImage={heroImageUrl}
+  pubDate={pubDate}
   tags={tags}
-  author="JK"
 >
   <article class="prose prose-zinc mx-auto max-w-4xl dark:prose-invert lg:prose-lg">
     <div class="mb-12">
@@ -121,9 +91,9 @@ if (heroImage) {
     </div>
 
     {
-      updatedDate && (
+      pubDate && (
         <div class="mt-8 text-sm italic text-zinc-500 dark:text-zinc-400">
-          Last updated on <FormattedDate date={updatedDate} />
+          Last updated on <FormattedDate date={pubDate} />
         </div>
       )
     }
@@ -245,6 +215,7 @@ if (heroImage) {
 
       codeBlocks.forEach((codeBlock) => {
         // Skip if already processed
+        if (!codeBlock.parentElement) return;
         if (codeBlock.parentElement.classList.contains('enhanced')) return;
 
         // Mark as enhanced
@@ -295,7 +266,7 @@ if (heroImage) {
         // Always include all lines, including empty ones
         for (let i = 0; i < lines.length; i++) {
           const lineNumber = document.createElement('span');
-          lineNumber.textContent = i + 1;
+          lineNumber.textContent = `${i + 1}`;
           lineNumbers.appendChild(lineNumber);
         }
 
@@ -347,8 +318,10 @@ if (heroImage) {
         // Wrap table in responsive container
         const wrapper = document.createElement('div');
         wrapper.className = 'table-container';
-        table.parentNode.insertBefore(wrapper, table);
-        wrapper.appendChild(table);
+        if (table.parentNode) {
+          table.parentNode.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        }
 
         // Add zebra striping to rows
         const rows = table.querySelectorAll('tbody tr');

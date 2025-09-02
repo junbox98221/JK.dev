@@ -1,46 +1,39 @@
 ---
 import { SEO, Props as SeoType } from 'astro-seo';
+import type { WithContext, BlogPosting, WebSite } from 'schema-dts';
+import type { BlogPost } from '../content/config';
 
-// Constants
-const SITE_NAME = 'JK.dev';
-const TWITTER_HANDLE = '@jk_dev';
-const DEFAULT_SECTION = 'Technology';
+const SITE_CONFIG = {
+  name: 'JK.dev',
+  defaultSection: 'Technology',
+  defaultImage: '/logo.png',
+  logo: '/logo.png',
+  language: 'ko-KR',
+} as const;
 
-export interface Props {
-  title: string;
-  description: string;
+export interface Props extends BlogPost {
   type?: 'website' | 'article';
-  image?: string;
-  publishedTime?: string;
-  tags?: string[];
-  author?: string;
 }
 
 const {
   title,
-  description,
+  description = 'JK.dev - 프론트엔드 개발과 성능 최적화에 관한 기술 블로그',
   type = 'website',
-  image,
-  publishedTime,
+  heroImage = SITE_CONFIG.defaultImage,
+  pubDate,
   tags = [],
-  author = 'JK',
 } = Astro.props;
 
+const author = 'JK';
 const siteUrl = Astro.site?.href;
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
-let imageUrl: string;
-if (image) {
-  imageUrl = image.startsWith('http') ? image : new URL(image, siteUrl).href;
-} else {
-  imageUrl = new URL('/placeholder.jpg', siteUrl).href;
-}
 
-const blogPostingSchema = {
+const blogPostSchema: WithContext<BlogPosting> = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: title,
-  description: description,
-  image: imageUrl,
+  description,
+  image: heroImage,
   author: {
     '@type': 'Person',
     name: author,
@@ -48,99 +41,71 @@ const blogPostingSchema = {
   },
   publisher: {
     '@type': 'Organization',
-    name: SITE_NAME,
+    name: SITE_CONFIG.name,
     logo: {
       '@type': 'ImageObject',
-      url: new URL('/favicon.svg', siteUrl).href,
+      url: new URL(SITE_CONFIG.logo, siteUrl).href,
     },
   },
-  datePublished: publishedTime,
-  dateModified: publishedTime,
+  datePublished: pubDate?.toISOString(),
+  dateModified: pubDate?.toISOString(),
   mainEntityOfPage: {
     '@type': 'WebPage',
     '@id': canonicalUrl,
   },
   keywords: tags.join(', '),
-  inLanguage: 'ko-KR',
+  inLanguage: SITE_CONFIG.language,
   url: canonicalUrl,
 };
 
-const websiteSchema = {
+const websiteSchema: WithContext<WebSite> = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: SITE_NAME,
+  name: SITE_CONFIG.name,
   description: '프론트엔드 개발에 관한 기술 블로그',
   url: siteUrl,
   author: {
     '@type': 'Person',
     name: 'JK',
   },
-  inLanguage: 'ko-KR',
+  inLanguage: SITE_CONFIG.language,
 };
 
-const structuredData = type === 'article' ? blogPostingSchema : websiteSchema;
+const structuredData = type === 'article' ? blogPostSchema : websiteSchema;
 
 const openGraphConfig: SeoType['openGraph'] = {
   basic: {
-    title: title,
-    type: type,
-    image: imageUrl,
+    title,
+    type,
     url: canonicalUrl,
+    image: heroImage,
   },
   optional: {
-    description: description,
-    siteName: SITE_NAME,
+    description,
+    siteName: SITE_CONFIG.name,
     locale: 'ko_KR',
   },
   image: {
     alt: title,
-    width: 1200,
-    height: 630,
   },
   article:
-    type === 'article' && publishedTime
+    type === 'article' && pubDate
       ? {
-          publishedTime: publishedTime,
-          modifiedTime: publishedTime,
+          publishedTime: pubDate?.toISOString(),
+          modifiedTime: pubDate?.toISOString(),
           authors: [author],
-          section: DEFAULT_SECTION,
-          tags: tags,
+          section: SITE_CONFIG.defaultSection,
+          tags,
         }
       : undefined,
 };
 
 const twitterConfig: SeoType['twitter'] = {
   card: 'summary_large_image',
-  site: TWITTER_HANDLE,
-  creator: TWITTER_HANDLE,
-  title: title,
-  description: description,
-  image: imageUrl,
+  title,
+  description,
+  image: heroImage,
   imageAlt: title,
-};
-
-const extendConfig: SeoType['extend'] = {
-  meta: [
-    { name: 'author', content: author },
-    { name: 'language', content: 'ko' },
-    { name: 'robots', content: 'index,follow' },
-    { name: 'theme-color', content: '#ffffff' },
-    { name: 'format-detection', content: 'telephone=no' },
-    ...(type === 'article' && tags.length > 0
-      ? [{ name: 'keywords', content: tags.join(', ') }]
-      : []),
-  ],
-  link: [
-    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-    { rel: 'sitemap', href: '/sitemap-index.xml' },
-    {
-      rel: 'alternate',
-      type: 'application/rss+xml',
-      title: `${SITE_NAME} RSS Feed`,
-      href: '/rss.xml',
-    },
-    { rel: 'preconnect', href: 'https://cdn.jsdelivr.net', crossorigin: '' },
-  ],
 };
 ---
 
@@ -150,7 +115,6 @@ const extendConfig: SeoType['extend'] = {
   canonical={canonicalUrl}
   openGraph={openGraphConfig}
   twitter={twitterConfig}
-  extend={extendConfig}
 />
 
 <!-- Structured Data (JSON-LD) -->
