@@ -6,25 +6,20 @@ import SEOComponent from '../components/SEOComponent.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
+import type { BlogPost } from '../content/config';
 
-export interface Props {
-  title: string;
-  description?: string;
-  image?: string;
+export interface Props extends BlogPost {
   type?: 'website' | 'article';
-  publishedTime?: string;
-  tags?: string[];
-  author?: string;
 }
 
 const {
   title,
   description = 'JK.dev - 프론트엔드 개발과 성능 최적화에 관한 기술 블로그',
-  image,
+  heroImage,
   type = 'website',
-  publishedTime,
+  pubDate,
+  updatedDate,
   tags,
-  author,
 } = Astro.props;
 ---
 
@@ -38,10 +33,10 @@ const {
       title={title}
       description={description}
       type={type}
-      image={image}
-      publishedTime={publishedTime}
+      heroImage={heroImage}
+      pubDate={pubDate}
+      updatedDate={updatedDate}
       tags={tags}
-      author={author}
     />
 
     <link
