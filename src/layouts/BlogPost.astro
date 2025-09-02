@@ -17,32 +17,14 @@ try {
   canonicalURL = new URL('https://example.com');
 }
 
-let heroImageUrl: string | undefined;
-if (heroImage) {
-  try {
-    if (heroImage.startsWith('http')) {
-      heroImageUrl = heroImage;
-    } else if (heroImage.startsWith('/')) {
-      if (Astro.site) {
-        heroImageUrl = new URL(heroImage, Astro.site).toString();
-      } else {
-        heroImageUrl = heroImage;
-      }
-    } else {
-      heroImageUrl = heroImage;
-    }
-  } catch (error) {
-    console.error(`Error processing heroImage: ${heroImage}`, error);
-    heroImageUrl = heroImage;
-  }
-}
+let heroImageUrl = heroImage ? new URL(heroImage, Astro.site).toString() : undefined;
 ---
 
 <Layout
   title={title}
   description={description}
   type="article"
-  heroImage={heroImageUrl}
+  heroImage={heroImage}
   pubDate={pubDate}
   tags={tags}
 >
