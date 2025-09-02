@@ -1,0 +1,308 @@
+---
+title: '기술 블로그 seo 개선'
+description: '최근 제작한 이 블로그를 운영하면서 글을 쌓아가던 중, 검색 유입이 적고 SNS에 공유했을 때 썸네일이나 설명이 제대로 표시되지 않는 문제를 겪었습니다.'
+date: 2025-08-28
+tags: ['SEO']
+pubDate: 2025-08-28
+heroImage: '/seo.jpg'
+---
+
+import { Image } from 'astro:assets';
+import build from './asset/build.png';
+import head1 from './asset/head1.png';
+import head2 from './asset/head2.png';
+import robots from './asset/robots.txt.png';
+import searchConsole from './asset/search-console.png';
+
+# 0. 들어가며
+
+블로그를 운영하면서 검색 유입과 소셜 공유 미리보기(썸네일, 설명 등)가 기대만큼 깔끔하게 나오지 않는 걸 확인했습니다.  
+그래서 SEO 기본 개념을 다시 정리하고, 실제 블로그에 적용한 개선 작업들을 기록해 두려 합니다.
+
+이번 글에서는
+
+- SEO 기본 개념과 핵심 요소
+- 현재 블로그에 적용된 부분과 부족했던 점
+- 개선을 위해 적용한 구체적인 설정
+- 실제 적용 후 확인된 결과
+
+순서대로 살펴보겠습니다.
+
+# 1. 먼저 SEO란 무엇인가?
+
+SEO(Search Engine Optimization)는 **검색 엔진 최적화**를 뜻합니다.
+
+구글이나 네이버 같은 검색 엔진이 웹사이트를 더 잘 이해하고, 검색 결과에서 더 높은 위치에 노출될 수 있도록
+
+**콘텐츠와 구조를 최적화하는 작업**입니다. SEO 전략은 3가지로 나뉩니다.
+
+## 1.1 On-Page SEO
+
+> 검색 엔진이 사이트를 잘 이해하도록 내부 요소를 최적화하는 작업
+
+1. 좋은 컨텐츠
+2. title, meta, canonical, open graph 태그
+3. open graph 태그
+4. JSON-LD 데이터
+
+
+
+### canonical 태그란?
+아래와 같이 동일한 콘텐츠이지만 파라미터나 서브도메인이 다른 경우 검색엔진에 대표 주소를 알리는 태그.
+
+- `example.com/page`
+- `example.com/page?ref=naver`
+- `m.example.com/page`
+
+```jsx
+<link rel="canonical" href="https://example.com/original-page" />
+```
+
+### JSON-LD 데이터란?
+
+검색엔진이 페이지 내용을 이해할 수 있도록 구조화된 정보를 제공하는 방식.
+
+seo 기본 메타 태그는 **기본 seo 정보**, JSON-LD는 **구조화된 상세 정보**를 제공합니다.
+
+```jsx
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Next.js Image 최적화 완벽 가이드",
+  "description": "Next.js에서 Image 컴포넌트를 활용한 성능 최적화 방법을 정리했습니다.",
+  ...
+}
+</script>
+```
+
+
+## 1.2 Technical SEO
+
+> 검색엔진이 사이트를 크롤링하고 인덱싱할 수 있도록 개선하는 작업
+
+1. Robots.txt, sitemap.xml, rss 제공
+2. 논리적인 사이트 구조(카테고리 → 하위 페이지)
+3. 검색엔진 관리자 도구(ex: google search console)에 sitemap 등록
+
+
+Robots.txt: 검색엔진 크롤러에게 크롤링이 가능한 페이지를 알려주는 규칙 파일
+Sitemap.xml: 사이트에 존재하는 페이지 개요를 담은 파일
+RSS: 새 글 업데이트를 자동으로 받아볼 수 있도록 제공하는 피드
+
+## 1.3 Off-Page SEO
+
+> 웹 사이트의 외부 평판을 늘리고 개선하는 작업
+
+1. 다양한 플랫폼에서의 백링크 확보
+
+백링크: 다른 웹사이트에서 내 웹사이트로 연결된 하이퍼링크
+
+정리하면 다음과 같습니다.
+
+1. On-Page SEO: 사이트 내부 최적화
+2. Technical SEO: 는 기술적 기반 최적화
+3. Off-Page SEO: 사이트 외부에서 검색 엔진 신뢰도와 권위를 높이는 활동
+
+# 2. 현재 블로그에 적용된 SEO 요소
+
+운영 중인 블로그는 [Astro](https://astro.build/?utm_source=chatgpt.com)를 기반으로 제작되었으며, [Astro 테마 갤러리](https://astro.build/themes/1/?utm_source=chatgpt.com)에 등록된 [**Minimalistic Astro Blog**](https://astro.build/themes/details/minimalistic-astro-blog/?utm_source=chatgpt.com) 테마를 가져와 수정·보완하는 방식으로 작업했습니다.
+
+테마 설명에는 meta tag, Open Graph, Twitter Cards 등 SEO 최적화 요소가 기본 포함되어 있다고 안내되어 있었지만, 실제로 살펴본 결과 레이아웃 컴포넌트에는 최소한의 메타 태그만 설정되어 있었습니다.
+
+```html
+// Layout.astro 파일. 최소한의 세팅만 되어있다.
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="generator" content="{Astro.generator}" />
+<meta name="description" content="{description}" />
+<title>{title}</title>
+```
+
+또한, [**테마 템플릿 포스트**](https://astro-blog-pi-ashen.vercel.app/blog/optimizing-web-performance?utm_source=chatgpt.com)를 개발자 도구로 직접 확인해본 결과, Open Graph나 Twitter Card 관련 태그는 찾아볼 수 없었습니다.
+
+<Image src={head1} alt="헤드 태그" />
+
+즉, 기본적인 SEO 메타 태그 이외에는 추가 설정이 되어 있지 않았고, 실제 검색 엔진 및 SNS 미리보기에서 효과적인 노출을 기대하기 어려운 상태였습니다. 따라서 SEO 최적화를 위해서는 필수적인 메타 태그뿐만 아니라 Open Graph, Twitter Card 등의 요소를 직접 세팅할 필요가 있었습니다.
+
+# 3 On-Page SEO 세팅하기
+
+검색엔진과 소셜 플랫폼이 페이지를 더 잘 이해하고, 검색 결과 및 공유 미리보기를 최적화하기 위해 다양한 메타 태그를 설정합니다.
+
+### 3.1 SEO 전용 컴포넌트 구성하기
+
+[`astro-seo` 패키지](https://www.npmjs.com/package/astro-seo)를 기반으로 한 **SEO 전용 컴포넌트**를 제작했습니다.
+
+이 컴포넌트는 각 페이지에서 `title`, `description`, `image`, `tags` 등을 넘겨주면, 자동으로 다음 요소들을 삽입합니다.
+
+- `<title>` 및 `<meta description>`
+- Open Graph(OG) 태그
+- Twitter Card
+- Canonical URL
+- JSON-LD 구조화 데이터
+
+```jsx
+// SeoComponent.astro
+---
+import { SEO, Props as SeoType } from 'astro-seo';
+
+const SITE_NAME = 'JK.dev';
+const TWITTER_HANDLE = '@jk_dev';
+const {
+  title,
+  description,
+  type = 'website',
+  image,
+  publishedTime,
+  tags = [],
+  author = 'JK',
+} = Astro.props;
+
+const siteUrl = Astro.site?.href;
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+
+const openGraphConfig: SeoType['openGraph'] = {
+  basic: { title, type, image, url: canonicalUrl },
+  optional: { description, siteName: SITE_NAME, locale: 'ko_KR' },
+};
+const twitterConfig: SeoType['twitter'] = {
+  card: 'summary_large_image',
+  creator: TWITTER_HANDLE,
+  title,
+  description,
+  image,
+};
+---
+
+<SEO
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  openGraph={openGraphConfig}
+  twitter={twitterConfig}
+/>
+```
+
+### 3.2 최종 결과
+
+다음과 같이 검색엔진 최적화(SEO)와 소셜 공유 최적화에 필요한 태그들이 모두 자동 삽입되었습니다.
+
+<Image src={head2} alt="헤드 태그 최종 결과" />
+
+
+# 4. Technical SEO 세팅하기
+
+검색엔진이 사이트를 크롤링하고 인덱싱할 수 있도록 개선합니다.
+
+### 4.1 robots.txt
+
+앞서 간략히 설명한 검색엔진 크롤러에게 크롤링이 가능한 페이지를 알려주는 규칙 파일입니다.
+
+```
+# 기본 포맷
+User-agent: [대상 봇 이름 또는 *]
+Disallow: [차단할 경로]
+Allow: [허용할 경로]
+
+Sitemap: [사이트맵 경로]
+
+---
+# 관리자 페이지, GPT 관련 크롤러 차단 예시
+
+User-agent: *
+Disallow: /admin/
+Allow: /
+
+User-agent: GPTBot
+Disallow: /
+```
+
+크롤러가 접근할 수 있도록 서비스 환경 [`https://jk-devv.vercel.app/robots.txt`](https://jk-devv.vercel.app/robots.txt) 경로에 배포되어야 합니다.
+
+[astro는 public 폴더에 위치시키면 서비스 루트 경로에 그대로 배포됩니다.](https://docs.astro.build/ko/guides/integrations-guide/sitemap/#robotstxt-%EB%82%B4-%EC%82%AC%EC%9D%B4%ED%8A%B8%EB%A7%B5-%EB%A7%81%ED%81%AC)
+
+<Image src={robots} alt="robots.txt" />
+
+<aside>
+
+(*제 블로그는 크롤링을 차단해야 할 페이지가 존재하지 않습니다.
+
+또한, 공개적으로 인덱싱되길 원하는 글이므로, `Disallow` 규칙을 두지 않았습니다.
+
+따라서 기본 포맷 + sitemap url만 적용했습니다.)
+
+</aside>
+
+## 4.2 sitemap.xml
+
+사이트에 존재하는 페이지 개요를 담은 파일입니다.
+
+정적 사이트 생성을 위한 프레임워크인 Astro는 [`@astrojs/sitemap` 패키지](https://docs.astro.build/ko/guides/integrations-guide/sitemap/?utm_source=chatgpt.com)를 통해 빌드 시점에 자동으로 sitemap 파일을 생성할 수 있습니다.
+
+### **sitemap 설정 및 등록 과정**
+
+1. 헤드 태그에 링크 삽입
+
+```html
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  // sitemap 파일 경로 ...
+</head>
+```
+
+1. robots.txt에서 사이트맵 경로 추가
+
+```
+// robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap-index.xml <- 사이트맵 경로
+```
+
+1. [**검색엔진 관리자 도구(Search Console)**](https://search.google.com/search-console/welcome)에 직접 제출
+
+[Google Search Console](https://search.google.com/search-console/welcome?utm_source=chatgpt.com) → **Sitemaps** 메뉴에서 직접 sitemap.xml 경로를 제출합니다.
+
+<Image src={searchConsole} alt="search console" />
+
+1. 프로젝트 루트의 `astro.config.mjs`에서 `@astrojs/sitemap`을 통합합니다.
+
+```jsx
+// astro.config.mjs
+
+import sitemap from '@astrojs/sitemap';
+
+export default defineConfig({
+  site: getSiteURL(),
+  integrations: [sitemap()],
+});
+```
+
+이후 빌드를 실행하면 `dist/` 폴더 하위에 sitemap 파일들이 자동으로 생성됩니다. 배포 시에는 `https://도메인/sitemap.xml` 경로에서 접근 가능합니다.
+
+<Image src={build} alt="빌드 결과" />
+
+### 4. 3 최종 결과
+
+- `https://jk-devv.vercel.app/sitemap-index.xml`
+- `https://jk-devv.vercel.app/robots.txt`
+
+이 두 경로에서 검색엔진이 인식하는 “표준 위치”로 파일이 제공됩니다.
+
+결과적으로 크롤러는 robots.txt를 통해 sitemap 위치를 확인하고, sitemap.xml을 기반으로 블로그의 전체 페이지를 효율적으로 크롤링할 수 있게 됩니다.
+
+
+# 5. 정리하며
+
+이번 글에서는 SEO 기본 개념을 간단히 정리하고, 블로그에 직접 적용해 본 개선 작업들을 살펴봤습니다.
+
+- On-Page SEO: `astro-seo` 패키지를 기반으로 SEO 전용 컴포넌트를 만들어, `<title>`, `<meta description>`, Open Graph, Twitter Card, Canonical, JSON-LD 구조화 데이터 등 주요 태그를 자동으로 관리할 수 있게 했습니다.
+- Technical SEO: `robots.txt`와 `sitemap.xml`을 설정해 검색엔진 크롤러가 사이트를 더 쉽게 크롤링하고 인덱싱할 수 있도록 했습니다.
+- Off-Page SEO: 당장은 손댈 부분이 적지만, 블로그를 꾸준히 운영하며 자연스러운 백링크와 외부 노출을 늘려가는 것이 목표입니다.
+
