@@ -1,0 +1,211 @@
+---
+title: 'Firebase Auth로 보는 소셜 로그인: OAuth 2.0 흐름 완전 해부'
+pubDate: 2025-08-11
+date: 2025-08-11
+description: 'Firebase Authentication을 사용한 소셜 로그인은 OAuth 2.0 프로토콜을 기반으로 합니다. 이 글에서는 Google 로그인을 예로 들어, 팝업이 뜨고 닫히는 과정 뒤에서 실제로 어떤 일이 일어나는지 단계별로 살펴봅니다.'
+tags: ['Firebase', 'OAuth', 'Authentication']
+heroImage: '/social-login.png'
+---
+
+import { Image } from 'astro:assets';
+import googleLogin from './asset/google-login.png';
+import indexedDB from './asset/indexedDB.png';
+import loginFlow from './asset/login-flow.png';
+import loginDevTool from './asset/login-devtool.png';
+import popup from './asset/popup.gif';
+import serviceLogin from './asset/service-login.png';
+
+소셜 로그인을 누르면 팝업이 열리고, 몇 번의 리디렉션 끝에 어느새 로그인이 끝납니다.  
+그러나 그 사이에는 Authorization Code 교환, 무결성 검증(state/nonce/PKCE), Firebase 토큰 발급까지 여러 단계가 촘촘히 진행됩니다.  
+이 글은 그 과정을 OAuth 2.0과 Firebase Authentication 관점에서 팝업의 url 흐름과 함께 단계별로 해설합니다.
+
+# 1. OAuth 2.0이란?
+
+> 비밀번호를 직접 공유하지 않고도, 안전하게 리소스 접근 권한을 위임할 수 있게 해주는 인증 프로토콜입니다.
+
+예를 들어 **서비스**에서 **Google 로그인**을 하면, 사용자는 Google 계정으로 인증하고 어떤 정보를 제공할지(이메일, 프로필 등)에 동의합니다.
+
+동의가 완료되면 서비스는 사용자의 이메일, 프로필 사진 등을 API로 받아올 수 있게 됩니다.
+
+즉, 서비스는 사용자의 아이디·비밀번호를 알 필요 없이, **OAuth 2.0**을 통해 필요한 리소스에 안전하게 접근합니다.
+
+## 1.1 OAuth 주요 구성요소
+
+| 구분                 | 설명                                                          |
+| -------------------- | ------------------------------------------------------------- |
+| Resource Owner       | 웹 서비스를 이용하는 유저                                     |
+| Resource Server      | 사용자의 개인정보를 보관하는 서버(Google, Facebook, Kakao 등) |
+| Client               | 리소스 서버에 리소스를 요청하는 어플리케이션                  |
+| Authorization Server | 권한을 부여하는 인가 서버 (예: Google OAuth 2.0 서버)         |
+
+간단하게 OAuth 프로토콜의 흐름을 나타내면 다음과 같습니다.
+
+<Image src={loginFlow} alt="로그인 플로우" />
+
+이 글에선 주로 2,3,4번 과정에 집중하여 Firebase Auth가 어떻게 동작하는지 살펴보겠습니다.
+
+# 2. 실전: Firebase Auth로 보는 소셜 로그인 흐름
+
+Google 로그인을 누르면 팝업이 뜨고, 여러 번 도메인이 바뀐 뒤 다시 서비스 화면으로 돌아옵니다.  
+겉으로는 단순한 이동처럼 보이지만, 그 안에서는 **Authorization Code 발급 → 검증 → Firebase 토큰 교환**이라는 일련의 절차가 진행됩니다.
+
+<img src={popup.src} alt="팝업 로그인" />
+
+GIF에 보이는 리디렉션 경로는 다음과 같습니다.
+
+1. `https://{서비스 도메인}` [부모창]
+2. `https://{서비스 도메인}/__/auth/handler` [팝업창]
+3. `https://{Google 인가 서버 도메인}/o/oauth2/auth` [팝업창]
+4. `https://{Google 인가 서버 도메인}/o/oauth2/auth/oauthchooseaccount` [팝업창]
+5. `https://{서비스 도메인}/__/auth/handler` [팝업창]
+6. `https://{서비스 도메인}` [부모창]
+
+각 URL이 의미하는 바는 다음과 같습니다.
+
+1. **서비스 도메인** – 사용자가 접속한 서비스 화면
+2. **Firebase Auth 핸들러** – OAuth 응답을 처리하는 중간 경유지
+3. **Google OAuth 인가 서버** – 인가 요청이 전달되는 곳
+4. **Google 계정 선택 화면** – 사용자가 실제로 상호작용하는 UI
+5. **Firebase Auth 핸들러** – Authorization Code 반환 및 검증
+6. **서비스 복귀** – 로그인 완료 후 앱으로 돌아옴
+
+앞서 살펴본 OAuth 개념을 이 흐름에 적용하면 다음과 같이 대응됩니다.
+
+- **Resource Owner**: 사용자
+- **Resource Server**: Google API 서버
+- **Client**: 웹앱 + Firebase Auth SDK
+- **Authorization Server**: Google OAuth 2.0 서버
+
+이제, 각 단계에서 어떤 동작이 일어나는지 차례대로 살펴보겠습니다.
+
+## 1. 서비스 (`https://{서비스 도메인}`)
+
+흐름은 사용자가 “Google로 로그인” 버튼을 누르는 순간 시작됩니다.  
+중요한 점은, 서비스 자체가 사용자의 아이디·비밀번호를 직접 받지 않는다는 것입니다.
+
+클라이언트 앱(Firebase Auth SDK)은 버튼 클릭 이벤트를 감지하고,  
+곧바로 Firebase가 제공하는 **내부 핸들러 페이지(`/__/auth/handler`)**로 팝업을 리디렉션해 OAuth 절차를 개시합니다.
+
+<Image src={serviceLogin} alt="서비스 로그인 화면" width={300} />
+
+## 2. Firebase Auth 내부 핸들러(`https://{서비스 도메인}/__/auth/handler`)
+
+로그인 버튼 클릭 직후, 팝업은 먼저 Firebase에서 준비해 둔 **내부 핸들러 페이지**로 이동합니다.  
+이 페이지는 사용자가 직접 상호작용하는 화면이 아니라, OAuth 요청과 응답을 안전하게 중계하기 위한 **중간 경유지** 역할을 합니다.
+
+```text
+https://{서비스 도메인}/__/auth/handler
+   ?apiKey={apiKey}
+   &appName=[DEFAULT]-firebaseui-temp
+   &authType=signInViaPopup
+   &redirectUrl={서비스 도메인}/
+   &providerId=google.com
+   &scopes=profile
+```
+
+### 파라미터
+
+- `apiKey` : 이 요청이 어떤 Firebase 프로젝트에 속하는지 식별하는 키입니다.
+- `appName` : 이 핸들러가 어떤 Firebase App 인스턴스와 연결되어 있는지를 나타냅니다.
+- `redirectUrl` : 최종적으로 결과를 전달할 앱의 기준 Origin/URL입니다.
+- `providerId` : 어떤 OAuth 제공업체를 사용할지 지정합니다.
+- `scopes` : 권한 범위
+
+### 핵심 동작
+
+1. 보안 값 생성 및 기록
+
+- **CSRF** 방지를 위해 state, nonce 같은 임의의 값을 생성해 브라우저 저장소에 저장
+- 동시에 이 값들을 이후 요청 URL 파라미터에도 포함시킴
+
+2. 구글 인가 서버로 보낼 요청 URL 조립
+   - 인가 서버가 요구하는 파라미터(client_id, scope, redirect_uri 등)로 조립
+
+   ```text
+   https://accounts.google.com/o/oauth2/auth
+      &client_id={GCP에서 발급한 OAuth 클라이언트 ID}
+      &redirect_uri=https://{서비스 도메인}/__/auth/handler
+      &scope={요청 권한}
+      &state={CSRF 방지용 토큰}
+   ```
+
+이 과정을 거친 뒤, 팝업은 본격적으로 Google OAuth 인가 서버로 리디렉션됩니다.
+
+## 3~4 Google OAuth 인가 서버(`https://{Google 인가 서버 도메인}/o/oauth2/auth`)
+
+이제 팝업은 **Google OAuth 인가 서버**로 이동합니다.  
+여기서는 두 가지 중요한 화면과 절차가 진행됩니다.
+
+1. **로그인 화면 (Sign-in)**
+   - 사용자가 아직 구글 계정에 로그인하지 않았다면, 이메일과 비밀번호 입력 화면이 먼저 표시됩니다.
+   - 이미 로그인된 세션이 있으면 바로 계정 선택 화면으로 넘어갑니다.
+
+2. **계정 선택 및 권한 동의 화면**
+   - 사용자가 어떤 구글 계정을 사용할지 선택합니다.
+   - 동시에 서비스(Client)가 요청한 **scope**(예: 프로필, 이메일 등)에 대해 제공 여부를 확인합니다.
+
+<Image src={googleLogin} alt="Google 로그인 화면" width={250} />
+
+사용자가 동의까지 마치면, Google 인가 서버는 `Authorization Code`를 발급해 `redirect_uri`로 리디렉션됩니다.
+
+## 5. Firebase Auth 내부 핸들러(`https://{서비스 도메인}/__/auth/handler`)
+
+Google 로그인·동의가 끝나면, 인가 서버는 `redirect_uri`로 지정된 Firebase 핸들러로 사용자를 다시 돌려보냅니다.  
+이번에는 `Authorization Code`가 쿼리 파라미터에 포함되어 있습니다.
+
+```text
+https://{firebase-project-id}.firebaseapp.com/__/auth/handler
+   ?code={authorization-code}
+   &scope={요청 권한}
+   &state={이전에 전달하고, google이 다시 반환한 CSRF 방지용 토큰}
+```
+
+### 핵심 동작 개요
+
+1. 무결성 검증
+   1. 요청 시 생성해 둔 `state` 값을 쿼리의 값과 대조하여 CSRF 공격을 차단합니다.
+2. 인가 코드 전달
+   1. 검증을 통과하면 핸들러는 `window.opener.postMessage(...)`를 통해 `Authorization Code`를 부모 창(서비스)의 Firebase Auth SDK로 전달한 뒤, 팝업을 종료합니다.
+
+즉, 핸들러의 역할은 “코드를 안전하게 받아서, 부모 창 SDK에게 넘기고 종료”하는 것입니다.
+
+## 6. 서비스(`https://{서비스 도메인}`)
+
+부모 창에 있는 **Firebase Auth SDK**는 핸들러로부터 받은 `Authorization Code`를 넘겨받습니다.  
+이제 SDK는 이 코드를 Firebase 백엔드로 전송해 실제 토큰 교환을 진행합니다.
+
+### 동작 흐름
+
+1. Firebase Auth SDK → Firebase 백엔드로 `Authorization Code` 교환 요청 전송(호출 api: [signInWithIdp](https://cloud.google.com/identity-platform/docs/reference/rest/v1/accounts/signInWithIdp?hl=ko))
+
+<Image src={loginDevTool} alt="로그인 개발자 도구 예시" />
+
+1. Firebase 백엔드 ↔ Google 인가 서버
+
+- `Authorization Code`을 확인하고 `Firebase ID 토큰`/`Refresh 토큰`을 생성하여 SDK로 반환
+
+```json
+// Response
+{
+  "idToken": "Firebase가 발급한 ID 토큰",
+  "refreshToken": "Firebase가 발급한 장기 갱신 토큰",
+  "expiresIn": "ID 토큰의 유효기간",
+  "providerId": "사용된 공급자 ID (예: google.com, facebook.com)",
+  ...
+}
+```
+
+3. SDK는 Firebase ID 토큰/리프레시 토큰을 돌려받고 사용자 세션 IndexedDB에 저장
+
+<Image src={indexedDB} alt="IndexedDB 예시" />
+
+# 정리하며
+
+이번 글에서는 OAuth 2.0, Firebase Authentication을 통해 소셜 로그인 팝업 뒤에서 일어나는 과정을 처음부터 끝까지 따라가 봤습니다.
+
+- OAuth 2.0 핵심: 사용자는 인가 서버에서 계정 선택·동의를 진행하고, 앱은 Authorization Code → 토큰 흐름으로 권한을 위임받습니다.
+- Firebase Auth의 역할: 팝업 핸들러로 OAuth 요청/응답을 중계하고, Authorization Code를 Firebase 백엔드에 전달해 토큰을 교환합니다.
+
+즉, 단순히 “팝업이 떴다 닫혔다”가 아니라, 그 안에서 보안 검증과 토큰 교환이 치밀하게 수행되고 있음을 확인할 수 있습니다.
+
+다음 글에서는 Firebase Auth를 사용함에 있어서 발생하는 환경별 제약(iOS, 사파리, 서드파티 쿠키 차단 등)과 이를 해결하기 위한 대안을 살펴보겠습니다.

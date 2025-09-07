@@ -9,7 +9,7 @@ const { SITE_ORIGIN } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 const getSiteURL = () => {
   switch (process.env.NODE_ENV) {
     case 'development':
-      return `http//${SITE_ORIGIN}`;
+      return `http://${SITE_ORIGIN}`;
     default:
       return `https://${SITE_ORIGIN}`;
   }

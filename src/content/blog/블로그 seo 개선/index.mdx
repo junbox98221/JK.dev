@@ -45,9 +45,8 @@ SEO(Search Engine Optimization)는 **검색 엔진 최적화**를 뜻합니다.
 3. open graph 태그
 4. JSON-LD 데이터
 
-
-
 ### canonical 태그란?
+
 아래와 같이 동일한 콘텐츠이지만 파라미터나 서브도메인이 다른 경우 검색엔진에 대표 주소를 알리는 태그.
 
 - `example.com/page`
@@ -76,7 +75,6 @@ seo 기본 메타 태그는 **기본 seo 정보**, JSON-LD는 **구조화된 상
 </script>
 ```
 
-
 ## 1.2 Technical SEO
 
 > 검색엔진이 사이트를 크롤링하고 인덱싱할 수 있도록 개선하는 작업
@@ -84,7 +82,6 @@ seo 기본 메타 태그는 **기본 seo 정보**, JSON-LD는 **구조화된 상
 1. Robots.txt, sitemap.xml, rss 제공
 2. 논리적인 사이트 구조(카테고리 → 하위 페이지)
 3. 검색엔진 관리자 도구(ex: google search console)에 sitemap 등록
-
 
 Robots.txt: 검색엔진 크롤러에게 크롤링이 가능한 페이지를 알려주는 규칙 파일
 Sitemap.xml: 사이트에 존재하는 페이지 개요를 담은 파일
@@ -191,7 +188,6 @@ const twitterConfig: SeoType['twitter'] = {
 
 <Image src={head2} alt="헤드 태그 최종 결과" />
 
-
 # 4. Technical SEO 세팅하기
 
 검색엔진이 사이트를 크롤링하고 인덱싱할 수 있도록 개선합니다.
@@ -227,7 +223,7 @@ Disallow: /
 
 <aside>
 
-(*제 블로그는 크롤링을 차단해야 할 페이지가 존재하지 않습니다.
+(\*제 블로그는 크롤링을 차단해야 할 페이지가 존재하지 않습니다.
 
 또한, 공개적으로 인덱싱되길 원하는 글이므로, `Disallow` 규칙을 두지 않았습니다.
 
@@ -297,7 +293,6 @@ export default defineConfig({
 
 결과적으로 크롤러는 robots.txt를 통해 sitemap 위치를 확인하고, sitemap.xml을 기반으로 블로그의 전체 페이지를 효율적으로 크롤링할 수 있게 됩니다.
 
-
 # 5. 정리하며
 
 이번 글에서는 SEO 기본 개념을 간단히 정리하고, 블로그에 직접 적용해 본 개선 작업들을 살펴봤습니다.
@@ -305,4 +300,3 @@ export default defineConfig({
 - On-Page SEO: `astro-seo` 패키지를 기반으로 SEO 전용 컴포넌트를 만들어, `<title>`, `<meta description>`, Open Graph, Twitter Card, Canonical, JSON-LD 구조화 데이터 등 주요 태그를 자동으로 관리할 수 있게 했습니다.
 - Technical SEO: `robots.txt`와 `sitemap.xml`을 설정해 검색엔진 크롤러가 사이트를 더 쉽게 크롤링하고 인덱싱할 수 있도록 했습니다.
 - Off-Page SEO: 당장은 손댈 부분이 적지만, 블로그를 꾸준히 운영하며 자연스러운 백링크와 외부 노출을 늘려가는 것이 목표입니다.
-
