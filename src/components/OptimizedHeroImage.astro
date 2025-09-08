@@ -11,34 +11,21 @@ export interface Props {
   fetchpriority?: 'high' | 'low' | 'auto';
 }
 
-const { 
-  slug, 
-  heroImage, 
-  title, 
-  class: className = '', 
-  loading = 'lazy',
-  fetchpriority
-} = Astro.props;
+const { slug, heroImage, title, class: className = '', loading, fetchpriority } = Astro.props;
 
 // Get optimized image from heroImages mapping
 const optimizedImage = heroImages[slug as keyof typeof heroImages];
 ---
 
-{heroImage && (
-  optimizedImage ? (
+{
+  heroImage && optimizedImage && (
     <Image
       src={optimizedImage}
       alt={title}
       class={className}
       loading={loading}
       fetchpriority={fetchpriority}
-    />
-  ) : (
-    <img
-      src={heroImage}
-      alt={title}
-      class={className}
-      loading={loading}
+      priority
     />
   )
-)}
+}>
