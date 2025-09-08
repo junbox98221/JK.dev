@@ -47,7 +47,18 @@ try {
       heroImage && (
         <div class="relative mb-8 overflow-hidden shadow-lg sm:mb-12">
           <div class="aspect-[16/9] w-full">
-            <Image src={heroImage} alt={title} class="h-full w-full object-cover" loading="eager" />
+            {typeof heroImage === 'object' ? (
+              <Image
+                src={heroImage}
+                alt={title}
+                class="h-full w-full object-cover"
+                loading="eager"
+                decoding="sync"
+                fetchpriority="high"
+              />
+            ) : (
+              1
+            )}
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
