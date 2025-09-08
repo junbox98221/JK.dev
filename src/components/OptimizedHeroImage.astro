@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import { heroImages } from '../utils/heroImages';
+
+export interface Props {
+  slug: string;
+  heroImage?: string | any;
+  title: string;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const { 
+  slug, 
+  heroImage, 
+  title, 
+  class: className = '', 
+  loading = 'lazy',
+  fetchpriority
+} = Astro.props;
+
+// Get optimized image from heroImages mapping
+const optimizedImage = heroImages[slug as keyof typeof heroImages];
+---
+
+{heroImage && (
+  optimizedImage ? (
+    <Image
+      src={optimizedImage}
+      alt={title}
+      class={className}
+      loading={loading}
+      fetchpriority={fetchpriority}
+    />
+  ) : (
+    <img
+      src={heroImage}
+      alt={title}
+      class={className}
+      loading={loading}
+    />
+  )
+)}

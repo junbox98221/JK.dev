@@ -37,6 +37,7 @@ export async function getStaticPaths() {
             heroImage: optimizedHeroImage,
           },
         },
+        slug: entry.slug,
         readingTimeValue: readingTimeStr,
         readingTimeStats: readingTimeResult,
         nextPost: index > 0 ? sortedEntries[index - 1] : null,
@@ -46,13 +47,13 @@ export async function getStaticPaths() {
   });
 }
 
-const { entry, nextPost, prevPost, readingTimeValue, readingTimeStats } = Astro.props;
+const { entry, nextPost, prevPost, readingTimeValue, readingTimeStats, slug } = Astro.props;
 const { Content } = await entry.render();
 
 const finalReadingTime = entry.data.readingTime || readingTimeValue;
 ---
 
-<BlogPost {...entry.data} readingTime={finalReadingTime}>
+<BlogPost {...entry.data} readingTime={finalReadingTime} slug={slug}>
   <!-- Main Content - Enhanced with better typography and spacing -->
   <div
     class="prose prose-sm prose-zinc max-w-none dark:prose-invert sm:prose-base prose-headings:scroll-mt-24 prose-headings:font-semibold prose-a:font-medium prose-a:text-zinc-800 prose-a:underline-offset-4 hover:prose-a:text-zinc-600 prose-img:rounded-xl dark:prose-a:text-zinc-300 dark:hover:prose-a:text-zinc-100"

@@ -3,12 +3,12 @@ import Layout from './Layout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import ShareButtons from '../components/ShareButtons.astro';
 import TagList from '../components/TagList.astro';
-import { Image } from 'astro:assets';
+import OptimizedHeroImage from '../components/OptimizedHeroImage.astro';
 import './styles/markdown.css';
 import type { BlogPost } from '../content/config';
 
-export type Props = BlogPost;
-const { title, description, pubDate, heroImage, tags = [] } = Astro.props;
+export type Props = BlogPost & { slug?: string };
+const { title, description, pubDate, heroImage, tags = [], slug } = Astro.props;
 
 let canonicalURL;
 try {
@@ -44,21 +44,17 @@ try {
 
     <!-- Hero image with Astro Image optimization -->
     {
-      heroImage && (
+      heroImage && slug && (
         <div class="relative mb-8 overflow-hidden shadow-lg sm:mb-12">
           <div class="aspect-[16/9] w-full">
-            {typeof heroImage === 'object' ? (
-              <Image
-                src={heroImage}
-                alt={title}
-                class="h-full w-full object-cover"
-                loading="eager"
-                decoding="sync"
-                fetchpriority="high"
-              />
-            ) : (
-              1
-            )}
+            <OptimizedHeroImage
+              slug={slug}
+              heroImage={heroImage}
+              title={title}
+              class="h-full w-full object-cover"
+              loading="eager"
+              fetchpriority="high"
+            />
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
