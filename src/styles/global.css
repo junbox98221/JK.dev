@@ -5,27 +5,30 @@
 
 @layer base {
   :root {
-    /* 웹폰트 로딩 최적화를 위한 시스템 폰트 우선 */
     font-family:
+      'Pretendard Variable',
+      Pretendard,
       -apple-system,
       BlinkMacSystemFont,
-      /* macOS/iOS 시스템 폰트 */ 'Pretendard Variable',
-      Pretendard,
-      /* 한국어 최적화 */ 'Segoe UI',
+      'Segoe UI',
       Roboto,
       'Helvetica Neue',
       Arial,
-      /* Windows/Android */ 'Noto Sans KR',
+      'Noto Sans KR',
       'Malgun Gothic',
-      /* 한국어 폴백 */ sans-serif,
+      sans-serif,
       'Apple Color Emoji',
       'Segoe UI Emoji',
-      'Segoe UI Symbol'; /* 이모지 지원 */
+      'Segoe UI Symbol';
+  }
 
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  /* Self-hosted Pretendard Variable font */
+  @font-face {
+    font-family: 'Pretendard Variable';
+    src: url('/fonts/PretendardVariable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
     font-display: swap;
-    --theme-transition: 0.3s ease;
   }
 
   html {
