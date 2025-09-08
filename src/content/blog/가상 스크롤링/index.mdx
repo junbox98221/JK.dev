@@ -3,7 +3,7 @@ title: '가상 스크롤링 훝어보기'
 description: '가상 스크롤링의 핵심 원리와 다양한 기능들이 어떻게 구현되는지 탐구해봅니다.'
 pubDate: 2025-08-18
 tags: ['React', '가상 스크롤링']
-heroImage: '/scroll.webp'
+heroImage: './asset/hero.webp'
 ---
 
 import { Image } from 'astro:assets';
@@ -14,7 +14,6 @@ import performance from './asset/performance.png';
 import viewport1 from './asset/viewport1.png';
 import viewport2 from './asset/viewport2.png';
 import viewport3 from './asset/viewport3.png';
-
 
 # 0. 가상 스크롤링이란?
 
@@ -67,7 +66,6 @@ import viewport3 from './asset/viewport3.png';
 4. **컨테이너 높이만큼 확보**
    1. 컨테이너의 높이 = `height * count`
 5. **재계산 트리거**: 스크롤마다 위 과정을 재실행
-
 
 ## 2.2 동적 높이 처리
 
