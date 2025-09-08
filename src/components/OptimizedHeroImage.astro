@@ -9,6 +9,7 @@ export interface Props {
   class?: string;
   loading?: 'eager' | 'lazy';
   fetchpriority?: 'high' | 'low' | 'auto';
+  sizes?: string;
 }
 
 const { slug, heroImage, title, class: className = '', loading, fetchpriority } = Astro.props;
@@ -26,6 +27,7 @@ const optimizedImage = heroImages[slug as keyof typeof heroImages];
       loading={loading}
       fetchpriority={fetchpriority}
       priority
+      sizes={Astro.props.sizes}
     />
   )
 }>

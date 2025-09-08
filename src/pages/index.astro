@@ -54,6 +54,7 @@ const years = Object.keys(postsByYear).sort((a, b) => b - a);
                     heroImage={sortedPosts[0].data.heroImage}
                     title={sortedPosts[0].data.title}
                     class="w-full h-full object-contain transition-all duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
                   />
                 </div>
               )}
@@ -142,6 +143,7 @@ const years = Object.keys(postsByYear).sort((a, b) => b - a);
                         heroImage={post.data.heroImage}
                         title={post.data.title}
                         class="w-full h-full object-contain transition-all duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 396px"
                       />
                     </div>
                   )}

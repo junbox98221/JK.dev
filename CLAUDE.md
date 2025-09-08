@@ -69,3 +69,9 @@ React 컴포넌트, Tailwind CSS, MDX 지원을 포함한 **Astro.js 블로그**
 - 경로 별칭: `@/*`는 `src/*`에 매핑
 - Astro의 strict tsconfig 기반을 사용한 Strict TypeScript
 - `src/env.d.ts`의 Astro 특정 타입 정의
+
+## 이미지 최적화
+
+### 중요: 이미지 컴포넌트 사용시 주의사항
+
+- astro는 Image의 layout 속성을 사용하면 width, height을 자동으로 생성해
