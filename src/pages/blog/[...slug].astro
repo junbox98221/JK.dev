@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
-import readingTime from 'reading-time'; // Thêm import này nếu chưa có
+import readingTime from 'reading-time';
+import { heroImages } from '../../utils/heroImages';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -12,25 +13,33 @@ export async function getStaticPaths() {
   );
 
   return sortedEntries.map((entry, index) => {
-    // Tính toán readingTime từ nội dung markdown
     const readingTimeResult = readingTime(entry.body);
 
-    // Định dạng thời gian đọc thành chuỗi dễ đọc
     let readingTimeStr;
     if (readingTimeResult.minutes < 1) {
       readingTimeStr = 'Dưới 1 phút đọc';
     } else {
-      // Làm tròn lên và định dạng thành "X phút đọc"
       const minutes = Math.ceil(readingTimeResult.minutes);
       readingTimeStr = `${minutes} phút đọc`;
     }
 
+    const optimizedHeroImage = entry.data.heroImage
+      ? heroImages[entry.slug as keyof typeof heroImages] || entry.data.heroImage
+      : undefined;
+
     return {
       params: { slug: entry.slug },
       props: {
-        entry,
-        readingTimeValue: readingTimeStr, // Truyền chuỗi đã định dạng
-        readingTimeStats: readingTimeResult, // Truyền toàn bộ thông tin thống kê
+        entry: {
+          ...entry,
+          data: {
+            ...entry.data,
+            heroImage: optimizedHeroImage,
+          },
+        },
+        slug: entry.slug,
+        readingTimeValue: readingTimeStr,
+        readingTimeStats: readingTimeResult,
         nextPost: index > 0 ? sortedEntries[index - 1] : null,
         prevPost: index < sortedEntries.length - 1 ? sortedEntries[index + 1] : null,
       },
@@ -38,14 +47,13 @@ export async function getStaticPaths() {
   });
 }
 
-const { entry, nextPost, prevPost, readingTimeValue, readingTimeStats } = Astro.props;
+const { entry, nextPost, prevPost, readingTimeValue, readingTimeStats, slug } = Astro.props;
 const { Content } = await entry.render();
 
-// Ghi đè readingTime từ frontmatter nếu có, nếu không thì sử dụng giá trị đã tính
 const finalReadingTime = entry.data.readingTime || readingTimeValue;
 ---
 
-<BlogPost {...entry.data} readingTime={finalReadingTime}>
+<BlogPost {...entry.data} readingTime={finalReadingTime} slug={slug}>
   <!-- Main Content - Enhanced with better typography and spacing -->
   <div
     class="prose prose-sm prose-zinc max-w-none dark:prose-invert sm:prose-base prose-headings:scroll-mt-24 prose-headings:font-semibold prose-a:font-medium prose-a:text-zinc-800 prose-a:underline-offset-4 hover:prose-a:text-zinc-600 prose-img:rounded-xl dark:prose-a:text-zinc-300 dark:hover:prose-a:text-zinc-100"

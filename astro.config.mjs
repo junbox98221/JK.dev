@@ -18,4 +18,7 @@ const getSiteURL = () => {
 export default defineConfig({
   site: getSiteURL(),
   integrations: [tailwind(), react(), mdx(), sitemap()],
+  image: {
+    layout: 'constrained',
+  },
 });

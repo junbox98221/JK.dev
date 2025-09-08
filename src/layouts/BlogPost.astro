@@ -3,11 +3,12 @@ import Layout from './Layout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import ShareButtons from '../components/ShareButtons.astro';
 import TagList from '../components/TagList.astro';
+import OptimizedHeroImage from '../components/OptimizedHeroImage.astro';
 import './styles/markdown.css';
 import type { BlogPost } from '../content/config';
 
-export type Props = BlogPost;
-const { title, description, pubDate, heroImage, tags = [] } = Astro.props;
+export type Props = BlogPost & { slug?: string };
+const { title, description, pubDate, heroImage, tags = [], slug } = Astro.props;
 
 let canonicalURL;
 try {
@@ -16,8 +17,6 @@ try {
   console.error('Error creating canonical URL:', error);
   canonicalURL = new URL('https://example.com');
 }
-
-let heroImageUrl = heroImage ? new URL(heroImage, Astro.site).toString() : undefined;
 ---
 
 <Layout
@@ -43,16 +42,18 @@ let heroImageUrl = heroImage ? new URL(heroImage, Astro.site).toString() : undef
       <TagList tags={tags} class="mt-2" />
     </div>
 
-    <!-- Hero image with improved styling -->
+    <!-- Hero image with Astro Image optimization -->
     {
-      heroImage && (
+      heroImage && slug && (
         <div class="relative mb-8 overflow-hidden shadow-lg sm:mb-12">
           <div class="aspect-[16/9] w-full">
-            <img
-              src={heroImageUrl}
-              alt={title}
+            <OptimizedHeroImage
+              slug={slug}
+              heroImage={heroImage}
+              title={title}
               class="h-full w-full object-cover"
               loading="eager"
+              fetchpriority="high"
             />
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
