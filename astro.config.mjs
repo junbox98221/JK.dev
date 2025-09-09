@@ -4,6 +4,7 @@ import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { loadEnv } from 'vite';
+import playformInline from '@playform/inline';
 const { SITE_ORIGIN } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 
 const getSiteURL = () => {
@@ -17,7 +18,7 @@ const getSiteURL = () => {
 
 export default defineConfig({
   site: getSiteURL(),
-  integrations: [tailwind(), react(), mdx(), sitemap()],
+  integrations: [tailwind(), react(), mdx(), sitemap(), playformInline()],
   image: {
     layout: 'constrained',
   },
