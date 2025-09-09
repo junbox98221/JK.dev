@@ -353,15 +353,6 @@ try {
 
   // Initialize on first load
   document.addEventListener('DOMContentLoaded', setupBlogPostTransitions);
-
-  // Re-initialize when content changes via Astro's view transitions
-  document.addEventListener('astro:page-load', setupBlogPostTransitions);
-
-  // For compatibility with custom transition system
-  document.addEventListener('page-transition-complete', setupBlogPostTransitions);
-
-  // Also initialize when SPA navigation completes
-  document.addEventListener('spa-navigation-complete', setupBlogPostTransitions);
 </script>
 
 <style>

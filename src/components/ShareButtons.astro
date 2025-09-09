@@ -136,40 +136,4 @@ const encodedUrl = encodeURIComponent(url);
 
   // Set up the copy link button when the DOM is loaded
   document.addEventListener('DOMContentLoaded', setupCopyLinkButton);
-
-  // Also set up when the page content is updated via SPA navigation
-  document.addEventListener('astro:page-load', setupCopyLinkButton);
-
-  // For compatibility with the custom page transition system
-  document.addEventListener('page-transition-complete', setupCopyLinkButton);
-
-  // Handle SPA transitions for share links
-  function setupSpaTransitions() {
-    // Get all share links (Twitter, Facebook, LinkedIn)
-    const shareLinks = document.querySelectorAll('a[target="_blank"][rel="noopener noreferrer"]');
-
-    // Make sure external share links don't trigger page transitions
-    shareLinks.forEach((link) => {
-      link.setAttribute('data-spa-external', 'true');
-    });
-  }
-
-  // Initialize SPA transitions
-  document.addEventListener('DOMContentLoaded', setupSpaTransitions);
-  document.addEventListener('astro:page-load', setupSpaTransitions);
-  document.addEventListener('page-transition-complete', setupSpaTransitions);
-
-  // Dispatch custom event when share action is completed
-  function notifyShareComplete() {
-    document.dispatchEvent(new CustomEvent('share-action-complete'));
-  }
-
-  // Add analytics tracking for share actions if needed
-  function trackShareAction(platform) {
-    // You can implement analytics tracking here
-    console.log(`Shared on ${platform}`);
-
-    // Notify other components that share action is complete
-    notifyShareComplete();
-  }
 </script>
