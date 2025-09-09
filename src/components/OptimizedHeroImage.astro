@@ -10,9 +10,19 @@ export interface Props {
   loading?: 'eager' | 'lazy';
   fetchpriority?: 'high' | 'low' | 'auto';
   sizes?: string;
+  priority?: boolean;
+  decoding?: 'async' | 'sync' | 'auto';
 }
 
-const { slug, heroImage, title, class: className = '', loading, fetchpriority } = Astro.props;
+const {
+  decoding,
+  slug,
+  heroImage,
+  title,
+  class: className = '',
+  loading,
+  fetchpriority,
+} = Astro.props;
 
 // Get optimized image from heroImages mapping
 const optimizedImage = heroImages[slug as keyof typeof heroImages];
@@ -26,8 +36,8 @@ const optimizedImage = heroImages[slug as keyof typeof heroImages];
       class={className}
       loading={loading}
       fetchpriority={fetchpriority}
-      priority
       sizes={Astro.props.sizes}
+      decoding={decoding}
     />
   )
 }

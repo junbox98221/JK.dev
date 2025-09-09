@@ -16,7 +16,7 @@ const postsByYear = sortedPosts.reduce((acc, post) => {
   return acc;
 }, {});
 
-const years = Object.keys(postsByYear).sort((a, b) => b - a);
+const years = Object.keys(postsByYear).sort((a, b) =>   Number(b) - Number(a));
 
 // Removed unused allTags variable
 ---
@@ -55,6 +55,9 @@ const years = Object.keys(postsByYear).sort((a, b) => b - a);
                     title={sortedPosts[0].data.title}
                     class="w-full h-full object-contain transition-all duration-700 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                    fetchpriority='high'
+                    loading='eager'
+                    decoding='async'
                   />
                 </div>
               )}
