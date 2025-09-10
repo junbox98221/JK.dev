@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import Layout from '../../layouts/Layout.astro';
 
 // Get all unique tags from blog posts
 const allPosts = await getCollection('blog');
@@ -23,7 +23,7 @@ const tagObjects = tags.map(tag => {
 const sortedTags = [...tagObjects].sort((a, b) => b.count - a.count);
 ---
 
-<BaseLayout title="Tags - JK.dev">
+<Layout title="Tags - JK.dev">
   <div class="w-full mx-auto px-3 sm:px-6 py-6 sm:py-12 md:py-16 theme-transition-all">
     <!-- Enhanced header section with animated elements - improved for mobile -->
     <div class="relative mb-8 sm:mb-12 md:mb-16 text-center theme-transition-element">
@@ -94,189 +94,23 @@ const sortedTags = [...tagObjects].sort((a, b) => b.count - a.count);
       </div>
     )}
   </div>
-</BaseLayout>
+</Layout>
 
 <script>
-  // Ultra-reliable responsiveness handling
+  // Simplified tags page interactions
   document.addEventListener('DOMContentLoaded', () => {
-    // Fix viewport width issues on mobile
-    const fixViewportWidth = () => {
-      // Force the viewport to be exactly the width of the device
-      const viewport = document.querySelector('meta[name="viewport"]');
-      if (!viewport) {
-        const meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-      } else {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-      }
+    // Simple touch support for mobile
+    document.querySelectorAll('.theme-ripple').forEach(item => {
+      item.addEventListener('touchstart', () => {
+        item.classList.add('touch-active');
+      }, { passive: true });
       
-      // Fix for horizontal overflow
-      document.body.style.overflowX = 'hidden';
-      document.documentElement.style.overflowX = 'hidden';
-      document.documentElement.style.width = '100%';
-      document.body.style.width = '100%';
-    };
-    
-    fixViewportWidth();
-    
-    // Adjust tag items based on screen size with extreme precision
-    const adjustTagItems = () => {
-      const tagItems = document.querySelectorAll('.theme-ripple');
-      const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-      const isVerySmall = width < 360;
-      const isExtremelySmall = width < 280;
-      const isMicroScreen = width < 240;
-      
-      // Fix container width to match viewport exactly
-      const container = document.querySelector('.tag-cloud');
-      if (container) {
-        container.style.maxWidth = '100vw';
-        container.style.width = '100%';
-        container.style.boxSizing = 'border-box';
-        
-        // Remove any margins that might cause overflow
-        container.style.marginLeft = '0';
-        container.style.marginRight = '0';
-      }
-      
-      // Fix grid width
-      const grid = document.querySelector('.grid');
-      if (grid) {
-        grid.style.width = '100%';
-        grid.style.maxWidth = '100%';
-      }
-      
-      tagItems.forEach(item => {
-        // Set appropriate classes based on screen size
-        if (isMicroScreen) {
-          item.classList.add('micro-screen');
-          item.classList.remove('extremely-small-screen', 'very-small-screen');
-        } else if (isExtremelySmall) {
-          item.classList.add('extremely-small-screen');
-          item.classList.remove('very-small-screen', 'micro-screen');
-        } else if (isVerySmall) {
-          item.classList.add('very-small-screen');
-          item.classList.remove('extremely-small-screen', 'micro-screen');
-        } else {
-          item.classList.remove('very-small-screen', 'extremely-small-screen', 'micro-screen');
-        }
-        
-        // Ensure text doesn't overflow on small screens
-        const tagName = item.querySelector('h3');
-        // Removed unused tagCount variable
-        
-        if (tagName) {
-          // Set title for accessibility
-          tagName.title = tagName.textContent.trim();
-          
-          // Adjust text length based on screen size
-          if (isMicroScreen && tagName.textContent.length > 6) {
-            tagName.dataset.fullText = tagName.textContent;
-            tagName.textContent = tagName.textContent.substring(0, 6) + '...';
-          } else if (isExtremelySmall && tagName.textContent.length > 8) {
-            tagName.dataset.fullText = tagName.textContent;
-            tagName.textContent = tagName.textContent.substring(0, 8) + '...';
-          } else if (isVerySmall && tagName.textContent.length > 12) {
-            tagName.dataset.fullText = tagName.textContent;
-            tagName.textContent = tagName.textContent.substring(0, 12) + '...';
-          } else if (tagName.dataset.fullText) {
-            tagName.textContent = tagName.dataset.fullText;
-            delete tagName.dataset.fullText;
-          }
-        }
-        
-        // Set the tag hue for hover effects
-        const hue = item.style.getPropertyValue('--tag-hue');
-        item.style.setProperty('--hover-hue', hue);
-      });
-    };
-    
-    // Run on load
-    adjustTagItems();
-    
-    // Run on resize with optimized debounce
-    let resizeTimer;
-    const handleResize = () => {
-      if (resizeTimer) {
-        window.cancelAnimationFrame(resizeTimer);
-      }
-      
-      resizeTimer = window.requestAnimationFrame(() => {
-        fixViewportWidth();
-        adjustTagItems();
-      });
-    };
-    
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-    
-    // Ensure layout is recalculated after page is fully loaded
-    window.addEventListener('load', () => {
-      fixViewportWidth();
-      adjustTagItems();
-      // Force recalculation after images and fonts are loaded
-      setTimeout(() => {
-        fixViewportWidth();
-        adjustTagItems();
-      }, 500);
-    });
-    
-    // Fix for iOS Safari and other mobile browsers
-    if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent)) {
-      document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
-      
-      // Fix for mobile viewport height issues
-      const setVh = () => {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-      };
-      
-      setVh();
-      window.addEventListener('resize', setVh);
-      window.addEventListener('orientationchange', () => {
-        // Wait for orientation change to complete
+      item.addEventListener('touchend', () => {
         setTimeout(() => {
-          setVh();
-          fixViewportWidth();
-        }, 100);
-      });
-    }
-    
-    // Add touch support for mobile devices
-    const addTouchSupport = () => {
-      const tagItems = document.querySelectorAll('.theme-ripple');
-      
-      tagItems.forEach(item => {
-        item.addEventListener('touchstart', () => {
-          item.classList.add('touch-active');
-        }, { passive: true });
-        
-        item.addEventListener('touchend', () => {
-          setTimeout(() => {
-            item.classList.remove('touch-active');
-          }, 150);
-        }, { passive: true });
-        
-        // Cancel active state if touch moves away
-        item.addEventListener('touchmove', (e) => {
-          const touch = e.touches[0];
-          const rect = item.getBoundingClientRect();
-          
-          if (
-            touch.clientX < rect.left || 
-            touch.clientX > rect.right || 
-            touch.clientY < rect.top || 
-            touch.clientY > rect.bottom
-          ) {
-            item.classList.remove('touch-active');
-          }
-        }, { passive: true });
-      });
-    };
-    
-    addTouchSupport();
+          item.classList.remove('touch-active');
+        }, 150);
+      }, { passive: true });
+    });
   });
 </script>
 
@@ -555,38 +389,4 @@ const sortedTags = [...tagObjects].sort((a, b) => b.count - a.count);
   }
 </style>
 
-<script>
-  // Handle SPA transitions for tags index page
-  function setupPageInteractions() {
-    // Add hover effect for tag cards on touch devices
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    if (isTouchDevice) {
-      const tagCards = document.querySelectorAll('.tag-cloud a');
-      
-      tagCards.forEach(card => {
-        card.addEventListener('touchstart', () => {
-          card.classList.add('is-touched');
-        });
-        
-        card.addEventListener('touchend', () => {
-          setTimeout(() => {
-            card.classList.remove('is-touched');
-          }, 300);
-        });
-      });
-    }
-    
-    // Animate tag cards with staggered delay
-    const tagCards = document.querySelectorAll('.tag-cloud a');
-    tagCards.forEach((card, index) => {
-      setTimeout(() => {
-        card.classList.add('animate-reveal');
-      }, 100 + (index * 50));
-    });
-  }
-  
-  // Initialize on first load
-  document.addEventListener('DOMContentLoaded', setupPageInteractions);
-</script>
 

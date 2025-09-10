@@ -129,93 +129,44 @@ const finalReadingTime = entry.data.readingTime || readingTimeValue;
 </BlogPost>
 
 <script>
-  // Removing TOC-related functions
-
-  // Add copy buttons to code blocks
-  function initializeCodeCopyButtons() {
-    const codeBlocks = document.querySelectorAll('pre');
-
-    codeBlocks.forEach((block) => {
-      // Skip if already processed by either method
-      if (
-        block.classList.contains('code-block-processed') ||
-        block.classList.contains('enhanced')
-      ) {
-        return;
-      }
-
+  // Optimized code copy functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add copy buttons to code blocks
+    document.querySelectorAll('pre:not(.code-block-processed)').forEach((block) => {
       block.classList.add('code-block-processed');
-
-      // Create wrapper if not already wrapped
-      let wrapper;
-      if (
-        block.parentNode.classList.contains('relative') &&
-        block.parentNode.classList.contains('group')
-      ) {
-        wrapper = block.parentNode;
-      } else {
-        wrapper = document.createElement('div');
-        wrapper.className = 'relative group';
-        block.parentNode.insertBefore(wrapper, block);
-        wrapper.appendChild(block);
-      }
-
-      // Add copy button if not already present
-      if (!wrapper.querySelector('.copy-button') && !wrapper.querySelector('.copy-code-button')) {
-        const copyButton = document.createElement('button');
-        copyButton.className =
-          'copy-button absolute top-2 right-2 p-1.5 rounded-md bg-zinc-700/50 hover:bg-zinc-700 text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
-        copyButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-          </svg>
-        `;
-
-        copyButton.addEventListener('click', () => {
-          const code = block.querySelector('code').innerText;
-          navigator.clipboard.writeText(code);
-
-          // Show copied feedback
-          copyButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-          `;
-
-          setTimeout(() => {
-            copyButton.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-              </svg>
-            `;
-          }, 2000);
-        });
-
-        wrapper.appendChild(copyButton);
-      }
+      
+      // Create wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'relative group';
+      block.parentNode.insertBefore(wrapper, block);
+      wrapper.appendChild(block);
+      
+      // Create copy button
+      const copyButton = document.createElement('button');
+      copyButton.className = 'copy-button absolute top-2 right-2 p-1.5 rounded-md bg-zinc-700/50 hover:bg-zinc-700 text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
+      copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>';
+      
+      copyButton.addEventListener('click', async () => {
+        const code = block.querySelector('code')?.textContent || '';
+        await navigator.clipboard.writeText(code);
+        
+        // Show success feedback
+        copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
+        setTimeout(() => {
+          copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>';
+        }, 2000);
+      });
+      
+      wrapper.appendChild(copyButton);
     });
-  }
-
-  // Handle SPA transitions for blog post navigation
-
-  // Main initialization function
-  function initializeBlogPost() {
-    // Initialize remaining components
-    initializeCodeCopyButtons();
-
-    // Scroll to hash if present in URL
+    
+    // Handle hash navigation
     if (window.location.hash) {
       setTimeout(() => {
-        const element = document.querySelector(window.location.hash);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        document.querySelector(window.location.hash)?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
-  }
-
-  // Initialize on first load
-  document.addEventListener('DOMContentLoaded', initializeBlogPost);
+  });
 </script>
 
 <style>

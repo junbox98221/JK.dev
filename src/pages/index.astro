@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import Layout from '../layouts/Layout.astro';
 import OptimizedHeroImage from '../components/OptimizedHeroImage.astro';
 
 const allPosts = await getCollection('blog') || [];
@@ -9,19 +9,19 @@ const sortedPosts = allPosts.sort(
 );
 
 // Group posts by year for timeline effect
-const postsByYear = sortedPosts.reduce((acc, post) => {
+const postsByYear: Record<number, typeof sortedPosts> = sortedPosts.reduce((acc, post) => {
   const year = new Date(post.data.pubDate).getFullYear();
   if (!acc[year]) acc[year] = [];
   acc[year].push(post);
   return acc;
-}, {});
+}, {} as Record<number, typeof sortedPosts>);
 
 const years = Object.keys(postsByYear).sort((a, b) =>   Number(b) - Number(a));
 
 // Removed unused allTags variable
 ---
 
-<BaseLayout title="Blog - JK.dev">
+<Layout title="Blog - JK.dev">
   <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
     <!-- Enhanced header with search - improved responsive spacing -->
     <div class="relative mb-12 sm:mb-20">
@@ -196,7 +196,7 @@ const years = Object.keys(postsByYear).sort((a, b) =>   Number(b) - Number(a));
       </div>
     </div>
   </div>
-</BaseLayout>
+</Layout>
 
 <style>
   /* Blob animation */
@@ -278,73 +278,17 @@ const years = Object.keys(postsByYear).sort((a, b) =>   Number(b) - Number(a));
 </style>
 
 <script>
-  // Script không thay đổi - giữ nguyên chức năng
+  // Optimized index page interactions
   document.addEventListener('DOMContentLoaded', () => {
-    const backToTopButton = document.getElementById('back-to-top');
-    
-    if (backToTopButton) {
-      // Show button when scrolled down
-      const toggleBackToTopButton = () => {
-        if (window.scrollY > 300) {
-          backToTopButton.classList.remove('opacity-0', 'invisible');
-          backToTopButton.classList.add('opacity-100', 'visible');
-        } else {
-          backToTopButton.classList.remove('opacity-100', 'visible');
-          backToTopButton.classList.add('opacity-0', 'invisible');
-        }
-      };
-      
-      // Scroll to top when clicked
-      backToTopButton.addEventListener('click', () => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      });
-      
-      // Check scroll position
-      window.addEventListener('scroll', toggleBackToTopButton);
-      toggleBackToTopButton(); // Initial check
-    }
-    
-    // Add smooth scrolling to year links (only if not already handled)
-    document.querySelectorAll('a[href^="#year-"]:not([data-scroll-handled])').forEach(anchor => {
-      anchor.setAttribute('data-scroll-handled', 'true');
+    // Smooth scrolling for year links
+    document.querySelectorAll('a[href^="#year-"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
-        
+        const targetElement = document.querySelector(this.getAttribute('href') || '');
         if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 100,
-            behavior: 'smooth'
-          });
-          
-          // Update URL hash without jumping
-          history.pushState(null, null, targetId);
+          targetElement.scrollIntoView({ behavior: 'smooth' });
         }
       });
     });
-    
-    // Add touch support for hover effects
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    if (isTouchDevice) {
-      const articles = document.querySelectorAll('article');
-      
-      articles.forEach(article => {
-        article.addEventListener('touchstart', () => {
-          article.classList.add('is-touched');
-        });
-        
-        article.addEventListener('touchend', () => {
-          setTimeout(() => {
-            article.classList.remove('is-touched');
-          }, 300);
-        });
-      });
-    }
   });
-  
 </script>

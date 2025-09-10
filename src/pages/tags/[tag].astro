@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import Layout from '../../layouts/Layout.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 
 // Add this near the top of the frontmatter section
@@ -49,7 +49,7 @@ const relatedTags = [...new Set(
 )].slice(0, 5);
 ---
 
-<BaseLayout title={`Posts tagged with "${tag}"`}>
+<Layout title={`Posts tagged with "${tag}"`}>
   <div class="max-w-5xl mx-auto px-4 py-10 sm:py-16">
     <!-- Header section với màu zinc thay vì gray -->
     <div class="relative mb-10 sm:mb-16">
@@ -203,7 +203,7 @@ const relatedTags = [...new Set(
       </div>
     )}
   </div>
-</BaseLayout>
+</Layout>
 
 <style>
   /* Grid pattern background */
@@ -295,43 +295,5 @@ const relatedTags = [...new Set(
   }
 </style>
 
-<script>
-  // Handle SPA transitions for tag pages
-  function setupPageInteractions() {
-    // Initialize animations for tag page
-    function animateTagContent() {
-      // Animate header elements
-      const headerElements = document.querySelectorAll('h1, .tag-icon, .tag-description');
-      headerElements.forEach((el, index) => {
-        setTimeout(() => {
-          el.classList.add('animate-reveal');
-        }, 100 + (index * 150));
-      });
-      
-      // Animate posts with staggered delay
-      const articles = document.querySelectorAll('article');
-      articles.forEach((article, index) => {
-        setTimeout(() => {
-          article.classList.add('animate-reveal');
-        }, 400 + (index * 100));
-      });
-      
-      // Animate related tags
-      const relatedTags = document.querySelectorAll('.related-tags a');
-      relatedTags.forEach((tag, index) => {
-        setTimeout(() => {
-          tag.classList.add('animate-reveal');
-        }, 600 + (index * 50));
-      });
-    }
-    
-    // Run animations
-    animateTagContent();
-  }
-  
-  // Initialize on first load
-  document.addEventListener('DOMContentLoaded', setupPageInteractions);
-</script>
 
 <!-- Add this at the end of your page -->
-</BaseLayout>

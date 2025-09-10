@@ -8,7 +8,12 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
 import type { BlogPost } from '../content/config';
 
-export interface Props extends BlogPost {
+export interface Props {
+  title: string;
+  description?: string;
+  heroImage?: BlogPost['heroImage'];
+  pubDate?: BlogPost['pubDate'];
+  tags?: BlogPost['tags'];
   type?: 'website' | 'article';
 }
 
