@@ -42,7 +42,8 @@ const {
       pubDate={pubDate}
       tags={tags}
     />
-
+    <!-- LCP 이미지 preload - 첫 번째 포스트의 hero 이미지용 -->
+    <slot name="hero-preload" />
     <link
       rel="preload"
       href="/fonts/PretendardVariable.woff2"
@@ -56,7 +57,6 @@ const {
   <body
     class="flex min-h-screen flex-col bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
   >
-
     <!-- Background component with dot pattern and ambient glow -->
     <Background />
 
@@ -67,6 +67,5 @@ const {
       </main>
     </div>
     <Footer />
-
   </body>
 </html>

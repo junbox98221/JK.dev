@@ -4,11 +4,21 @@ import FormattedDate from '../components/FormattedDate.astro';
 import ShareButtons from '../components/ShareButtons.astro';
 import TagList from '../components/TagList.astro';
 import OptimizedHeroImage from '../components/OptimizedHeroImage.astro';
+import { generateHeroPreload } from '../utils/heroImagePreload';
 import './styles/markdown.css';
 import type { BlogPost } from '../content/config';
 
 export type Props = BlogPost & { slug?: string };
 const { title, description, pubDate, heroImage, tags = [], slug } = Astro.props;
+
+// Hero 이미지 preload용
+const heroPreloadData =
+  heroImage && slug
+    ? await generateHeroPreload({
+        slug,
+        heroImage,
+      })
+    : null;
 
 let canonicalURL;
 try {
@@ -27,6 +37,20 @@ try {
   pubDate={pubDate}
   tags={tags}
 >
+  <!-- Hero 이미지 preload -->
+  {
+    heroPreloadData && (
+      <link
+        slot="hero-preload"
+        rel="preload"
+        as="image"
+        href={heroPreloadData.href}
+        imagesizes={heroPreloadData.imagesizes}
+        imagesrcset={heroPreloadData.imagessrcset}
+      />
+    )
+  }
+
   <article class="prose prose-zinc mx-auto max-w-4xl dark:prose-invert lg:prose-lg">
     <div class="mb-12">
       <h1
@@ -82,10 +106,7 @@ try {
       )
     }
   </article>
-
-  <slot name="after-article" />
 </Layout>
-
 
 <style>
   /* Enhanced hero image styling */
