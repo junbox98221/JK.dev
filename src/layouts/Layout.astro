@@ -1,7 +1,6 @@
 ---
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
-import Background from '../components/Background.astro';
 import SEOComponent from '../components/SEOComponent.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
@@ -33,7 +32,6 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
-
     <SEOComponent
       title={title}
       description={description}
@@ -44,28 +42,24 @@ const {
     />
     <!-- LCP 이미지 preload - 첫 번째 포스트의 hero 이미지용 -->
     <slot name="hero-preload" />
-    <link
-      rel="preload"
-      href="/fonts/PretendardVariable.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <Analytics />
-    <SpeedInsights />
   </head>
-  <body
-    class="flex min-h-screen flex-col bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
-  >
-    <!-- Background component with dot pattern and ambient glow -->
-    <Background />
+  <Analytics />
+  <SpeedInsights />
 
-    <div class="mx-auto w-full max-w-3xl flex-grow px-4 sm:px-6">
-      <Navigation />
-      <main class="py-12">
-        <slot />
-      </main>
-    </div>
-    <Footer />
-  </body>
+  <body
+    class="flex
+      min-h-screen
+      flex-col
+      bg-white
+      text-zinc-900
+      dark:bg-zinc-900
+      dark:text-zinc-100"
+  ></body>
+  <div class="mx-auto w-full max-w-3xl flex-grow px-4 sm:px-6">
+    <Navigation />
+    <main class="py-12">
+      <slot />
+    </main>
+  </div>
+  <Footer />
 </html>

@@ -6,8 +6,8 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: [
-          '-apple-system', 'BlinkMacSystemFont',
           'Pretendard Variable', 'Pretendard',
+          '-apple-system', 'BlinkMacSystemFont',
           'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial',
           'Noto Sans KR', 'Malgun Gothic',
           'sans-serif',

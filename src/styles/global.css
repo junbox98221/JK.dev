@@ -1,4 +1,7 @@
 /* Remove all the complex mobile menu styles and keep only what's necessary */
+
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,15 +23,6 @@
       'Apple Color Emoji',
       'Segoe UI Emoji',
       'Segoe UI Symbol';
-  }
-
-  /* Self-hosted Pretendard Variable font */
-  @font-face {
-    font-family: 'Pretendard Variable';
-    src: url('/fonts/PretendardVariable.woff2') format('woff2');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: optional;
   }
 
   html {
