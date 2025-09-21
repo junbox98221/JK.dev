@@ -26,9 +26,6 @@ importers:
       '@critters-rs/astro':
         specifier: ^1.1.3
         version: 1.1.3(astro@5.13.5(@types/node@24.3.1)(jiti@1.21.7)(lightningcss@1.29.3)(rollup@4.50.1)(terser@5.39.0)(typescript@5.9.2)(yaml@2.8.1))
-      '@playform/inline':
-        specifier: ^0.1.2
-        version: 0.1.2(@types/node@24.3.1)(jiti@1.21.7)(lightningcss@1.29.3)(rollup@4.50.1)(terser@5.39.0)(typescript@5.9.2)(yaml@2.8.1)
       '@vercel/analytics':
         specifier: 1.5.0
         version: 1.5.0(react@19.1.0)
@@ -666,9 +663,6 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playform/inline@0.1.2':
-    resolution: {integrity: sha512-Eqk1FbKc1bNf5zyTBzrqeUvH0qExIzf6auw+yDXRl2MMZOt72FXQfnES1dtdxgjIEf4TDbPBtJ1rTofp52vDvQ==}
-
   '@playform/pipe@0.1.3':
     resolution: {integrity: sha512-cjRcaj6b8XZMS+N51In78EuD9e0x0M3gYxi2g+qUGk1iya2uxcS+aSrXxfBUZueOjxADQwpyS4zLEhlbHCGcDA==}
 
@@ -1159,10 +1153,6 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  beasties@0.2.0:
-    resolution: {integrity: sha512-Ljqskqx/tbZagIglYoJIMzH5zgssyp+in9+9sAyh15N22AornBeIDnb8EZ6Rk+6ShfMxd92uO3gfpT0NtZbpow==}
-    engines: {node: '>=14.0.0'}
-
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
@@ -1651,9 +1641,6 @@ packages:
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
-
-  htmlparser2@9.1.0:
-    resolution: {integrity: sha512-5zfg6mHUoaer/97TxnGpxmbR7zJtPwIYFMZ/H5ucTlPZhKvtum05yiPK3Mgai3a0DyVxv7qYqoweaEd2nrYQzQ==}
 
   http-cache-semantics@4.2.0:
     resolution: {integrity: sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==}
@@ -2232,9 +2219,6 @@ packages:
         optional: true
       ts-node:
         optional: true
-
-  postcss-media-query-parser@0.2.3:
-    resolution: {integrity: sha512-3sOlxmbKcSHMjlUXQZKQ06jOswE7oVkXPxmZdoB1r5l0q6gTFTQSHxNxOrCccElbW7dxNytifNEo8qidX2Vsig==}
 
   postcss-nested@6.2.0:
     resolution: {integrity: sha512-HQbt28KulC5AJzG+cZtj9kvKB93CFCdLvog1WFLf1D+xmMvPGlBstkpTEZfK5+AN9hfJocyBFCNiqyS48bpgzQ==}
@@ -3703,48 +3687,6 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playform/inline@0.1.2(@types/node@24.3.1)(jiti@1.21.7)(lightningcss@1.29.3)(rollup@4.50.1)(terser@5.39.0)(typescript@5.9.2)(yaml@2.8.1)':
-    dependencies:
-      '@playform/pipe': 0.1.3
-      astro: 5.13.5(@types/node@24.3.1)(jiti@1.21.7)(lightningcss@1.29.3)(rollup@4.50.1)(terser@5.39.0)(typescript@5.9.2)(yaml@2.8.1)
-      beasties: 0.2.0
-      deepmerge-ts: 7.1.5
-    transitivePeerDependencies:
-      - '@azure/app-configuration'
-      - '@azure/cosmos'
-      - '@azure/data-tables'
-      - '@azure/identity'
-      - '@azure/keyvault-secrets'
-      - '@azure/storage-blob'
-      - '@capacitor/preferences'
-      - '@deno/kv'
-      - '@netlify/blobs'
-      - '@planetscale/database'
-      - '@types/node'
-      - '@upstash/redis'
-      - '@vercel/blob'
-      - '@vercel/functions'
-      - '@vercel/kv'
-      - aws4fetch
-      - db0
-      - encoding
-      - idb-keyval
-      - ioredis
-      - jiti
-      - less
-      - lightningcss
-      - rollup
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - typescript
-      - uploadthing
-      - yaml
-
   '@playform/pipe@0.1.3':
     dependencies:
       '@types/node': 22.13.14
@@ -4299,17 +4241,6 @@ snapshots:
   base-64@1.0.0: {}
 
   base64-js@1.5.1: {}
-
-  beasties@0.2.0:
-    dependencies:
-      css-select: 5.2.2
-      css-what: 6.2.2
-      dom-serializer: 2.0.0
-      domhandler: 5.0.3
-      htmlparser2: 9.1.0
-      picocolors: 1.1.1
-      postcss: 8.5.6
-      postcss-media-query-parser: 0.2.3
 
   binary-extensions@2.3.0: {}
 
@@ -4908,13 +4839,6 @@ snapshots:
       terser: 5.39.0
 
   html-void-elements@3.0.0: {}
-
-  htmlparser2@9.1.0:
-    dependencies:
-      domelementtype: 2.3.0
-      domhandler: 5.0.3
-      domutils: 3.2.2
-      entities: 4.5.0
 
   http-cache-semantics@4.2.0: {}
 
@@ -5696,8 +5620,6 @@ snapshots:
       yaml: 2.8.1
     optionalDependencies:
       postcss: 8.5.6
-
-  postcss-media-query-parser@0.2.3: {}
 
   postcss-nested@6.2.0(postcss@8.5.6):
     dependencies:
