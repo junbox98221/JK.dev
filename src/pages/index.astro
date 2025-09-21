@@ -83,7 +83,7 @@ const firstPostPreloadData = firstPost?.data.heroImage
             <article class="group relative overflow-hidden rounded-none border-b border-zinc-200 pb-6 dark:border-zinc-800 sm:pb-8">
               <div class="flex h-full flex-col gap-6 sm:gap-8 md:flex-row">
                 {sortedPosts[0].data.heroImage && (
-                  <div class="mx-auto h-60 w-full max-w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 sm:h-80 sm:max-w-md md:mx-0 md:h-96 md:w-1/2">
+                  <div class="mx-auto h-60 w-full max-w-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#141414] sm:h-80 sm:max-w-md md:mx-0 md:h-96 md:w-1/2">
                     <OptimizedHeroImage
                       slug={sortedPosts[0].slug}
                       heroImage={sortedPosts[0].data.heroImage}
@@ -190,12 +190,12 @@ const firstPostPreloadData = firstPost?.data.heroImage
                 {postsByYear[year].map((post) => (
                   <article class="group relative mx-auto flex h-full w-full max-w-sm flex-col sm:max-w-md md:mx-0">
                     {post.data.heroImage && (
-                      <div class="mb-4 h-48 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900 sm:h-56">
+                      <div class="mb-4 h-48 overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#141414] sm:h-56">
                         <OptimizedHeroImage
                           slug={post.slug}
                           heroImage={post.data.heroImage}
                           title={post.data.title}
-                          class="h-full w-full object-contain transition-all duration-700 group-hover:scale-105"
+                          class="h-full w-full rounded-lg object-contain transition-all duration-700 group-hover:scale-105"
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 396px"
                         />
                       </div>
