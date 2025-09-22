@@ -30,7 +30,4 @@ export default defineConfig({
   image: {
     layout: 'constrained',
   },
-  vite: {
-    assetsInclude: ['**/*.woff2'],
-  },
 });

@@ -1,8 +1,8 @@
 ---
-title: 'Firebase Auth로 보는 소셜 로그인: OAuth 2.0 흐름 완전 해부'
+title: 'Firebase Auth로 OAuth 2.0 흐름 해부'
 pubDate: 2025-08-11
 date: 2025-08-11
-description: 'Firebase Authentication을 사용한 소셜 로그인은 OAuth 2.0 프로토콜을 기반으로 합니다. 이 글에서는 Google 로그인을 예로 들어, 팝업이 뜨고 닫히는 과정 뒤에서 실제로 어떤 일이 일어나는지 단계별로 살펴봅니다.'
+description: 'Firebase Authentication을 사용한 OAuth 2.0 프로토콜을 단계별로 살펴봅니다.'
 tags: ['Firebase', 'OAuth', 'Authentication']
 heroImage: './asset/hero.png'
 ---
@@ -12,7 +12,7 @@ import googleLogin from './asset/google-login.png';
 import indexedDB from './asset/indexedDB.png';
 import loginFlow from './asset/login-flow.png';
 import loginDevTool from './asset/login-devtool.png';
-import popup from './asset/popup.gif';
+import popup from './asset/popup.mp4';
 import serviceLogin from './asset/service-login.png';
 
 소셜 로그인을 누르면 팝업이 열리고, 몇 번의 리디렉션 끝에 어느새 로그인이 끝납니다.  
@@ -49,7 +49,9 @@ import serviceLogin from './asset/service-login.png';
 Google 로그인을 누르면 팝업이 뜨고, 여러 번 도메인이 바뀐 뒤 다시 서비스 화면으로 돌아옵니다.  
 겉으로는 단순한 이동처럼 보이지만, 그 안에서는 **Authorization Code 발급 → 검증 → Firebase 토큰 교환**이라는 일련의 절차가 진행됩니다.
 
-<img src={popup.src} alt="팝업 로그인" />
+<video autoplay loop muted playsinline s>
+  <source src={popup} type="video/mp4" />
+</video>
 
 GIF에 보이는 리디렉션 경로는 다음과 같습니다.
 
