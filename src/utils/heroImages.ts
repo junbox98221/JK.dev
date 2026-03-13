@@ -7,6 +7,7 @@ import nextImageHero from '../content/blog/Next-image/asset/hero.png';
 import seoHero from '../content/blog/블로그 seo 개선/asset/hero.jpg';
 import performanceHero from '../content/blog/블로그 performance 개선/asset/hero.png';
 import firebaseAuth2Hero from '../content/blog/Firebase-auth-2/asset/hero.png';
+import legacyMaintenanceHero from '../content/blog/레거시 프로젝트 개선/asset/hero.jpg';
 
 export const heroImages = {
   '가상-스크롤링': scrollHero,
@@ -15,6 +16,7 @@ export const heroImages = {
   '블로그-seo-개선': seoHero,
   '블로그-performance-개선': performanceHero,
   'firebase-auth-2': firebaseAuth2Hero,
+  '레거시-프로젝트-개선': legacyMaintenanceHero,
 } as const;
 
 export type HeroImageSlug = keyof typeof heroImages;
