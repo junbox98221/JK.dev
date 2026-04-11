@@ -1,0 +1,258 @@
+---
+title: 'Polling부터 WebSocket까지'
+description: 'HTTP 요청/응답 구조에서 출발해 Polling, Long Polling, SSE, WebSocket의 차이와 프론트엔드 관점의 설계 포인트를 정리합니다.'
+pubDate: 2026-04-11
+tags: ['WebSocket', 'SSE', 'Polling', '실시간 통신']
+heroImage: './asset/hero.png'
+---
+
+import ConnectionFlowDiagram from '../../../components/ConnectionFlowDiagram.astro';
+
+# 1. 서버 → 클라이언트 통신 방식을 알아야 하는 이유
+
+서비스에서는 채팅, 알림, 대시보드, 작업 진행률, 협업 편집처럼 서버 상태의 변화가 곧바로 UI에 반영되어야 하는 기능을 자주 다루게 됩니다.
+
+이런 화면은 모두 비슷하게 보이지만, 실제로는 통신 방식에 따라 프론트엔드 코드 구조가 달라집니다. 어떤 방식은 반복 요청 관리가 중심이 되고, 어떤 방식은 이벤트 스트림 처리와 상태 병합이 더 중요해집니다.
+
+이번 글에서는 웹의 기본 통신 구조에서 출발해 Polling, Long Polling, SSE, WebSocket으로 이어지는 흐름을 순서대로 정리합니다.
+
+# 2. 웹의 기본 통신 방식: HTTP 요청/응답 구조와 한계
+
+웹의 기본 통신은 클라이언트가 요청을 보내고 서버가 응답하는 구조입니다.
+
+브라우저에서 사용하는 `fetch`, `axios`, 데이터 패칭 라이브러리도 모두 이 모델 위에서 동작합니다. 클라이언트가 먼저 요청을 보내야만 서버가 응답할 수 있고, 응답이 끝나면 그 요청 단위의 통신도 함께 종료됩니다.
+
+<ConnectionFlowDiagram variant="http" />
+
+이 구조에서는 서버 데이터가 바뀌더라도 브라우저는 그것을 자동으로 알 수 없습니다. 결국 클라이언트가 다시 요청해야만 최신 상태를 받을 수 있습니다.
+
+일반적인 CRUD 화면에서는 큰 문제가 되지 않지만, 예를 들어 다음과 같은 화면을 생각해볼 수 있습니다.
+
+- 새 메시지가 도착하는 채팅창
+- 작업 진행률이 계속 변하는 배치 실행 화면
+- 다른 사용자의 상태가 바로 반영되어야 하는 협업 화면
+- 수치가 지속적으로 바뀌는 운영 대시보드
+
+이 지점에서 서버의 변경 사항을 더 빠르게 전달하기 위한 방식이 필요해집니다.
+
+이후의 방식들은 모두 이 문제를 해결하기 위해 등장했습니다.
+
+# 3. Polling
+
+Polling은 클라이언트가 일정 주기마다 서버에 요청을 보내 최신 상태를 확인하는 방식입니다.
+
+`setInterval`로 `fetch`를 반복 호출하거나, TanStack Query의 `refetchInterval` 같은 기능을 활용하면 됩니다.
+
+<ConnectionFlowDiagram variant="polling" />
+
+```tsx
+useEffect(() => {
+  const id = window.setInterval(async () => {
+    const response = await fetch('/api/jobs/123/status');
+    const next = await response.json();
+    setJobStatus(next);
+  }, 5000);
+
+  return () => window.clearInterval(id);
+}, []);
+```
+
+Polling의 특징은 비교적 명확합니다.
+
+- 기존 HTTP 요청/응답 모델을 그대로 사용합니다.
+- 구현과 디버깅이 비교적 단순합니다.
+- 서버에서 별도 실시간 프로토콜을 준비하지 않아도 됩니다.
+
+단, 데이터가 바뀌지 않아도 요청은 계속 발생하고 일정 주기마다 서버와 브라우저가 계속 통신하게 됩니다.
+
+프론트엔드에서는 다음과 같은 문제도 함께 고려해야 합니다.
+
+- 응답이 느릴 때 요청이 겹치는 중복 요청
+- 늦게 도착한 오래된 응답이 최신 상태를 덮어쓰는 문제
+- 언마운트 이후 interval이 남는 cleanup 누락
+
+정리하면 Polling은 실시간성이 아주 높지 않고, 몇 초 단위 갱신으로도 충분한 화면에 적합합니다.
+
+# 4. Long Polling
+
+Long Polling은 Polling의 비효율을 줄이기 위해 나온 방식입니다.
+
+일반 Polling은 정해진 주기마다 무조건 요청을 보내지만, Long Polling은 요청을 보낸 뒤 서버가 새 데이터가 생길 때까지 응답을 잠시 보류합니다. 데이터가 생기면 서버가 응답하고, 클라이언트는 응답 직후 다시 요청을 보내는 흐름으로 이어집니다.
+
+<ConnectionFlowDiagram variant="long-polling" />
+
+클라이언트에서는 보통 응답이 끝난 뒤 다시 요청을 이어붙이는 형태로 구현합니다.
+
+```tsx
+import { useEffect } from 'react';
+
+export default function LongPollingExample() {
+  useEffect(() => {
+    let isActive = true; // 컴포넌트가 살아있는 동안만 polling을 유지하기 위한 플래그
+
+    const poll = async () => {
+      while (isActive) {
+        try {
+          // 서버에 long polling 요청
+          // 서버는 새 데이터가 생길 때까지 응답을 잠시 보류할 수 있음
+          const response = await fetch('/api/long-poll');
+
+          // 요청 실패 시 에러 처리
+          if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+          }
+
+          // 서버 응답 파싱
+          const data = await response.json();
+
+          // 새 데이터가 오면 처리
+          console.log('새 데이터:', data);
+
+          // 응답이 끝나면 즉시 다시 요청
+          // setInterval처럼 일정 주기로 보내는 것이 아니라,
+          // 응답이 끝난 뒤 다음 요청을 보내는 점이 핵심
+        } catch (error) {
+          console.error('Long polling error:', error);
+
+          // 에러가 나면 너무 빠르게 재요청하지 않도록 잠시 대기
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      }
+    };
+
+    poll(); // 컴포넌트 마운트 시 polling 시작
+
+    return () => {
+      isActive = false; // 컴포넌트 언마운트 시 polling 중단
+    };
+  }, []);
+
+  return <div>Long Polling Example</div>;
+}
+```
+
+겉으로 보면 반복 요청이지만, 구현 감각은 interval 방식보다 응답이 끝나면 다시 연결하는 루프 구조에 가깝습니다. Polling보다 불필요한 요청은 줄지만, 여전히 HTTP 요청/응답 모델 위에서 동작한다는 점은 변하지 않습니다.
+
+프론트엔드 관점에서는 오히려 연결을 오래 붙잡는 동안의 상태 관리가 더 중요해집니다.
+
+- 타임아웃 이후 재요청
+- abort 처리
+- 연결 대기 중 상태 관리
+- 실패 시 재시도와 백오프 전략
+
+즉, Long Polling은 Polling보다 조금 더 실시간에 가깝지만, 프론트엔드 입장에서는 여전히 반복 요청을 관리하는 문제를 벗어나지 않습니다.
+
+# 5. SSE
+
+SSE(Server-Sent Events)는 서버가 클라이언트에게 이벤트를 계속 전달하는 방식입니다.
+
+클라이언트는 한 번 연결을 맺고 나면 서버가 보내는 이벤트 스트림을 계속 수신할 수 있습니다. 프론트엔드에서는 `EventSource` API로 비교적 간단하게 사용할 수 있습니다.
+
+<ConnectionFlowDiagram variant="sse" />
+
+```ts
+const eventSource = new EventSource('/api/stream');
+
+eventSource.addEventListener('message', (event) => {
+  const data = JSON.parse(event.data);
+  console.log(data);
+});
+```
+
+핵심은 서버 → 클라이언트 단방향 통신이라는 점입니다.
+
+이 특성 때문에 SSE는 다음과 같은 화면에 적합합니다.
+
+- 실시간 알림
+- 로그 스트리밍
+- 진행률 표시
+- AI 응답 스트리밍
+
+즉, SSE는 Polling보다 서버 주도적으로 데이터를 전달할 수 있지만, 클라이언트와 서버가 자유롭게 양방향으로 메시지를 주고받아야 하는 상황에는 한계가 있습니다.
+
+# 6. WebSocket
+
+WebSocket은 클라이언트와 서버가 연결을 맺은 뒤, 그 연결을 유지하면서 양쪽이 자유롭게 데이터를 주고받는 방식입니다.
+
+HTTP 요청/응답처럼 요청 하나에 응답 하나가 매칭되는 구조가 아니라, 한 번 열린 연결 위에서 메시지 단위로 계속 통신하는 모델입니다. 이 점이 Polling, Long Polling, SSE와 가장 크게 갈리는 지점입니다.
+
+<ConnectionFlowDiagram variant="websocket" />
+
+```ts
+const socket = new WebSocket('wss://example.com/ws');
+
+socket.addEventListener('open', () => {
+  socket.send(JSON.stringify({ type: 'room.join', roomId: 'frontend-study' }));
+});
+
+socket.addEventListener('message', (event) => {
+  const message = JSON.parse(event.data);
+  console.log(message);
+});
+```
+
+채팅, 실시간 협업, 라이브 프레즌스처럼 양방향성과 즉시성이 중요한 기능에서 WebSocket이 자주 사용되는 이유도 데이터를 요청해서 받는 구조에서, 이벤트를 받아 반영하는 구조로 전환된다는 데 있습니다.
+
+# 7. WebSocket을 다룰 때 중요한 포인트
+
+WebSocket은 연결 이후의 상태 관리가 중요합니다.
+
+브라우저에서는 `open`, `message`, `error`, `close` 같은 이벤트를 기반으로 상태를 관리해야 합니다. 사용자가 보기에는 단순히 실시간으로 반영되는 것처럼 보이지만, 내부적으로는 연결됨, 끊김, 재연결 시도, 실패 같은 상태를 계속 다루게 됩니다.
+
+또 서버에서 들어오는 메시지를 그대로 UI에 반영하는 것이 아니라, 어떤 이벤트인지 판별하고 현재 상태에 안전하게 병합해야 합니다.
+
+이 과정에서 자주 마주치는 문제는 다음과 같습니다.
+
+- 중복 메시지 처리
+- 메시지 순서 문제
+- 재연결 전략
+- cleanup 누락으로 인한 메모리 누수
+- 오래된 상태를 참조하는 stale closure
+
+그래서 WebSocket은 단순한 API 사용법보다, 이벤트 스트림을 안정적으로 다루는 프론트엔드 설계 문제로 이해하는 편이 더 정확합니다.
+
+# 8. WebSocket과 상태 관리
+
+어떤 수신한 데이터는 컴포넌트 로컬 상태로 충분하지만, 어떤 데이터는 여러 화면에서 함께 참조해야 하므로 전역 상태나 캐시에 반영해야 합니다.
+
+이때는 다음과 같은 선택지가 생깁니다.
+
+- Zustand, Redux 같은 전역 상태 저장소
+- TanStack Query 캐시 갱신
+- 화면 범위가 작을 때의 로컬 상태
+
+실무에서는 보통 초기 데이터는 HTTP로 fetch하고, 이후 변경분은 WebSocket 이벤트로 반영하는 혼합 구조를 많이 사용합니다.
+
+1. 최초 진입 시 HTTP로 기준 데이터를 가져온다.
+2. 이후 WebSocket 연결을 열어 변경 이벤트를 수신한다.
+3. 끊김이나 재동기화가 필요할 때 다시 HTTP로 기준 상태를 맞춘다.
+
+이 구조는 초기 렌더링 안정성과 실시간성 사이의 균형을 맞추기에 적절합니다. 결국 WebSocket을 다룬다는 것은 소켓 연결 코드 자체보다, 이벤트 기반 데이터 흐름과 상태 저장소를 설계하는 문제에 더 가깝습니다.
+
+# 9. 언제 WebSocket을 선택해야 할까
+
+WebSocket은 유용하지만, 모든 문제에 필요한 방식은 아닙니다.
+
+사용자의 입력과 서버 이벤트가 빠르게 오가야 하고, 여러 사용자의 상태가 거의 동시에 반영되어야 하는 경우라면 WebSocket이 적합합니다.
+
+대표적인 예시는 다음과 같습니다.
+
+- 채팅
+- 실시간 협업
+- 게임
+- 라이브 프레즌스
+- 빠른 상태 동기화가 필요한 인터랙션
+
+반대로 몇 초 단위 갱신이면 충분하거나, 서버가 일방적으로 알려주기만 하면 되는 경우라면 Polling이나 SSE가 더 단순하고 적절할 수 있습니다.
+
+즉, WebSocket을 선택하는 기준은 실시간처럼 보이게 하고 싶은가가 아니라, 양방향성, 즉시성, 연결 유지 비용을 감수할 만큼의 요구사항이 실제로 있는가에 가깝습니다.
+
+# 10. 마치며
+
+서버가 클라이언트에 데이터를 전달하는 방식은 하나가 아닙니다.
+
+HTTP 요청/응답에서 시작해 Polling, Long Polling, SSE, WebSocket으로 갈수록 서버의 변화가 더 능동적이고 빠르게 클라이언트에 전달됩니다.
+
+그중에서도 WebSocket은 양방향성과 실시간성이 중요한 서비스에 적합하지만, 동시에 프론트엔드 상태 관리와 연결 관리에 더 많은 설계가 필요합니다.
+
+결국 중요한 것은 기술 이름을 외우는 것이 아니라, 각 방식이 어떤 문제를 해결하기 위해 존재하는지, 그리고 그에 따라 프론트엔드 코드 구조가 어떻게 달라지는지 이해하는 것입니다.

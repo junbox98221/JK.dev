@@ -1,0 +1,255 @@
+---
+type Variant = 'http' | 'polling' | 'long-polling' | 'sse' | 'websocket';
+type StepKind = 'to-server' | 'to-client' | 'bidirectional' | 'hold';
+
+interface Step {
+  label: string;
+  kind: StepKind;
+}
+
+interface DiagramConfig {
+  chips: string[];
+  note: string;
+  steps: Step[];
+  ariaLabel: string;
+}
+
+const { variant } = Astro.props as { variant: Variant };
+
+const diagrams: Record<Variant, DiagramConfig> = {
+  http: {
+    chips: ['클라이언트 요청 시작', '응답 후 연결 종료'],
+    note: '요청과 응답이 한 번 끝나면 해당 통신도 종료됩니다.',
+    ariaLabel: 'HTTP 요청 응답 흐름도',
+    steps: [
+      { label: 'request', kind: 'to-server' },
+      { label: 'response', kind: 'to-client' },
+    ],
+  },
+  polling: {
+    chips: ['주기적 재요청', '변화 없어도 요청 발생'],
+    note: '클라이언트가 일정 주기마다 다시 요청해 최신 상태를 확인합니다.',
+    ariaLabel: 'Polling 통신 흐름도',
+    steps: [
+      { label: 'request #1', kind: 'to-server' },
+      { label: 'response #1', kind: 'to-client' },
+      { label: 'request #2', kind: 'to-server' },
+      { label: 'response #2', kind: 'to-client' },
+    ],
+  },
+  'long-polling': {
+    chips: ['요청 후 대기', '응답 직후 재요청'],
+    note: '서버가 변경 사항이 생길 때까지 응답을 보류하고, 응답 직후 클라이언트가 다시 요청합니다.',
+    ariaLabel: 'Long Polling 통신 흐름도',
+    steps: [
+      { label: 'request', kind: 'to-server' },
+      { label: 'server waits', kind: 'hold' },
+      { label: 'response when changed', kind: 'to-client' },
+      { label: 'request again', kind: 'to-server' },
+    ],
+  },
+  sse: {
+    chips: ['연결 유지', '서버 → 클라이언트 단방향'],
+    note: '클라이언트는 한 번 연결한 뒤 서버가 보내는 이벤트를 계속 수신합니다.',
+    ariaLabel: 'SSE 통신 흐름도',
+    steps: [
+      { label: 'open stream', kind: 'to-server' },
+      { label: 'event #1', kind: 'to-client' },
+      { label: 'event #2', kind: 'to-client' },
+      { label: 'event #3', kind: 'to-client' },
+    ],
+  },
+  websocket: {
+    chips: ['연결 유지', '양방향 메시지'],
+    note: '연결이 열린 뒤에는 서버와 클라이언트가 필요할 때마다 메시지를 주고받을 수 있습니다.',
+    ariaLabel: 'WebSocket 통신 흐름도',
+    steps: [
+      { label: 'connection open', kind: 'bidirectional' },
+      { label: 'client message', kind: 'to-server' },
+      { label: 'server message', kind: 'to-client' },
+      { label: 'real-time sync', kind: 'bidirectional' },
+    ],
+  },
+};
+
+const diagram = diagrams[variant];
+const startY = 112;
+const rowGap = 34;
+const arrowStart = 248;
+const arrowEnd = 512;
+const markerId = `flow-arrow-${variant}`;
+const accent = '#111827';
+const soft = '#9ca3af';
+const line = '#d1d5db';
+---
+
+<figure class="flow-diagram">
+  <div class="chip-row">
+    {diagram.chips.map((chip) => <span class="chip">{chip}</span>)}
+  </div>
+
+  <svg viewBox="0 0 760 280" role="img" aria-label={diagram.ariaLabel}>
+    <defs>
+      <marker
+        id={markerId}
+        viewBox="0 0 10 10"
+        refX="9"
+        refY="5"
+        markerWidth="7"
+        markerHeight="7"
+        orient="auto-start-reverse"
+      >
+        <path d="M 0 0 L 10 5 L 0 10 z" fill={accent}></path>
+      </marker>
+    </defs>
+
+    <rect x="1" y="1" width="758" height="278" rx="24" fill="#fbfbfb" stroke={line}></rect>
+
+    <rect x="44" y="70" width="160" height="68" rx="18" fill="#f3f4f6" stroke={line}></rect>
+    <text x="124" y="98" text-anchor="middle" font-size="15" font-weight="700" fill={accent}>Server</text>
+    <text x="124" y="120" text-anchor="middle" font-size="12" fill={soft}>state source</text>
+
+    <rect x="556" y="70" width="160" height="68" rx="18" fill="#f3f4f6" stroke={line}></rect>
+    <text x="636" y="98" text-anchor="middle" font-size="15" font-weight="700" fill={accent}>Client</text>
+    <text x="636" y="120" text-anchor="middle" font-size="12" fill={soft}>UI update</text>
+
+    <line
+      x1="204"
+      y1="104"
+      x2="556"
+      y2="104"
+      stroke={line}
+      stroke-width="2"
+      stroke-dasharray="8 8"
+    ></line>
+
+    {
+      diagram.steps.map((step, index) => {
+        const y = startY + index * rowGap;
+        const labelY = y + 6;
+
+        if (step.kind === 'to-server') {
+          return (
+            <g>
+              <line
+                x1={arrowEnd}
+                y1={y}
+                x2={arrowStart}
+                y2={y}
+                stroke={accent}
+                stroke-width="3"
+                marker-end={`url(#${markerId})`}
+              ></line>
+              <text x="380" y={labelY - 8} text-anchor="middle" font-size="12" fill={accent}>
+                {step.label}
+              </text>
+            </g>
+          );
+        }
+
+        if (step.kind === 'to-client') {
+          return (
+            <g>
+              <line
+                x1={arrowStart}
+                y1={y}
+                x2={arrowEnd}
+                y2={y}
+                stroke={accent}
+                stroke-width="3"
+                marker-end={`url(#${markerId})`}
+              ></line>
+              <text x="380" y={labelY - 8} text-anchor="middle" font-size="12" fill={accent}>
+                {step.label}
+              </text>
+            </g>
+          );
+        }
+
+        if (step.kind === 'bidirectional') {
+          return (
+            <g>
+              <line
+                x1={arrowStart}
+                y1={y}
+                x2={arrowEnd}
+                y2={y}
+                stroke={accent}
+                stroke-width="3"
+                marker-start={`url(#${markerId})`}
+                marker-end={`url(#${markerId})`}
+              ></line>
+              <text x="380" y={labelY - 8} text-anchor="middle" font-size="12" fill={accent}>
+                {step.label}
+              </text>
+            </g>
+          );
+        }
+
+        return (
+          <g>
+            <line
+              x1={arrowEnd}
+              y1={y}
+              x2={arrowStart}
+              y2={y}
+              stroke={soft}
+              stroke-width="3"
+              stroke-dasharray="8 6"
+              marker-end={`url(#${markerId})`}
+            ></line>
+            <rect x="318" y={y - 14} width="124" height="24" rx="12" fill="#e5e7eb"></rect>
+            <text x="380" y={labelY - 1} text-anchor="middle" font-size="12" fill={accent}>
+              {step.label}
+            </text>
+          </g>
+        );
+      })
+    }
+  </svg>
+
+  <figcaption>{diagram.note}</figcaption>
+</figure>
+
+<style>
+  .flow-diagram {
+    margin: 1.5rem 0;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  figcaption {
+    margin-top: 0.75rem;
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+  @media (max-width: 640px) {
+    .chip {
+      font-size: 0.75rem;
+    }
+  }
+</style>
