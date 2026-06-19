@@ -10,6 +10,7 @@ import firebaseAuth2Hero from '../content/blog/Firebase-auth-2/asset/hero.png';
 import legacyMaintenanceHero from '../content/blog/레거시 프로젝트 개선/asset/hero.jpg';
 import websocketHero from '../content/blog/실시간 통신과 websocket/asset/hero.png';
 import fsdHero from '../content/blog/FSD 아키텍처 도입/asset/fsd-hero.png';
+import searchLogHero from '../content/blog/검색 개선 로그 문제 정의/asset/hero.jpg';
 
 export const heroImages = {
   '가상-스크롤링': scrollHero,
@@ -21,6 +22,7 @@ export const heroImages = {
   '레거시-프로젝트-개선': legacyMaintenanceHero,
   '실시간-통신과-websocket': websocketHero,
   'fsd-아키텍처-도입': fsdHero,
+  '검색-개선-로그-문제-정의': searchLogHero,
 } as const;
 
 export type HeroImageSlug = keyof typeof heroImages;
