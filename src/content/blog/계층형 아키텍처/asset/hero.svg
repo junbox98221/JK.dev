@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <title>Layered Architecture</title>
+  <desc>Presentation, Business, Persistence, Database layers connected from top to bottom.</desc>
+  <rect width="1200" height="675" fill="#fafafa" />
+
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="90" y="206" width="48" height="6" rx="3" fill="#7c3aed" />
+    <text x="90" y="277" fill="#18181b" font-size="60" font-weight="700">Layered</text>
+    <text x="90" y="350" fill="#18181b" font-size="60" font-weight="700">Architecture</text>
+    <text x="94" y="407" fill="#71717a" font-size="21">Separation of concerns</text>
+
+    <g stroke="#a1a1aa" stroke-width="2" fill="none">
+      <path d="M865 204v30m-6-6 6 6 6-6" />
+      <path d="M865 318v30m-6-6 6 6 6-6" />
+      <path d="M865 432v30m-6-6 6 6 6-6" />
+    </g>
+
+    <g font-size="25" font-weight="600" text-anchor="middle">
+      <rect x="650" y="128" width="430" height="76" rx="14" fill="#ddd6fe" stroke="#c4b5fd" />
+      <text x="865" y="175" fill="#4c1d95">Presentation</text>
+
+      <rect x="650" y="242" width="430" height="76" rx="14" fill="#ede9fe" stroke="#ddd6fe" />
+      <text x="865" y="289" fill="#5b21b6">Business</text>
+
+      <rect x="650" y="356" width="430" height="76" rx="14" fill="#f4f4f5" stroke="#d4d4d8" />
+      <text x="865" y="403" fill="#3f3f46">Persistence</text>
+
+      <rect x="650" y="470" width="430" height="76" rx="14" fill="#e4e4e7" stroke="#d4d4d8" />
+      <text x="865" y="517" fill="#3f3f46">Database</text>
+    </g>
+  </g>
+</svg>
