@@ -174,18 +174,10 @@ article {
     border-bottom-color: #60a5fa;
   }
   
-  /* Bold text styling - enhanced */
+  /* Bold text */
   .markdown-content strong {
     font-weight: 700;
-    color: #0f766e;
-    background: linear-gradient(to bottom, transparent 60%, rgba(20, 184, 166, 0.2) 40%);
-    padding: 0 0.2em;
-    border-radius: 0.2em;
-  }
-  
-  .dark .markdown-content strong {
-    color: #14b8a6;
-    background: linear-gradient(to bottom, transparent 60%, rgba(20, 184, 166, 0.15) 40%);
+    color: inherit;
   }
   
   /* Lists */
@@ -396,16 +388,17 @@ article {
   .markdown-content code:not(pre code) {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 0.875em;
-    color: #ef4444;
-    background-color: #f3f4f6;
-    padding: 0.2em 0.4em;
+    font-weight: 400;
+    color: #3f3f46;
+    background-color: #f4f4f5;
+    padding: 0.1em 0.3em;
     border-radius: 0.25rem;
     white-space: nowrap;
   }
   
   .dark .markdown-content code:not(pre code) {
-    color: #f87171;
-    background-color: #1f2937;
+    color: #e4e4e7;
+    background-color: #27272a;
   }
   
   /* Tables */

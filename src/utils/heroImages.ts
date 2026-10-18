@@ -11,6 +11,7 @@ import legacyMaintenanceHero from '../content/blog/레거시 프로젝트 개선
 import websocketHero from '../content/blog/실시간 통신과 websocket/asset/hero.png';
 import fsdHero from '../content/blog/FSD 아키텍처 도입/asset/fsd-hero.png';
 import searchLogHero from '../content/blog/검색 개선 로그 문제 정의/asset/hero.jpg';
+import eslintUtilityHero from '../content/blog/공용 유틸의 발견 가능성/asset/hero.svg';
 
 export const heroImages = {
   '가상-스크롤링': scrollHero,
@@ -23,6 +24,7 @@ export const heroImages = {
   '실시간-통신과-websocket': websocketHero,
   'fsd-아키텍처-도입': fsdHero,
   '검색-개선-로그-문제-정의': searchLogHero,
+  '공용-유틸의-발견-가능성': eslintUtilityHero,
 } as const;
 
 export type HeroImageSlug = keyof typeof heroImages;
